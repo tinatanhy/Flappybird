@@ -30,7 +30,7 @@ ClkWizPCLK clkwiz_pclk
     // Clock out ports
     .clk_out1(pclk),     // output clk_out1
     // Status and control signals
-    .reset(rstn), // input reset
+    .resetn(rstn), // input reset
     .locked(locked),       // output locked
     // Clock in ports
     .clk_in1(clk)      // input clk_in1
