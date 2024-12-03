@@ -2,7 +2,7 @@ module Top(
     input CLK100MHZ, CPU_RESETN,BTNC,BTNU,BTNL,
     output VGA_HS, VGA_VS,
     output [3:0] VGA_R, VGA_G, VGA_B,
-    output [2:0] LED
+    output reg[2:0] LED
 );
 wire CLK72HZ;
 ViewCore viewcore(
@@ -18,10 +18,22 @@ time72hz time72hz(
     .rst(CPU_RESETN),
     .clk_out(CLK72HZ)
 );
-Button button_instance ( 
-    .clk (CLK72HZ),  
-    .BTNC (BTNC),   
-    .LED (LED)   
-); 
+wire pressed;         
+wire check;         
+wire released;        
+
+Button button_inst (  
+    .clk(CLK72HZ),  
+    .BTNC(BTNC),  
+    .pressed(pressed),  
+    .check(check),  
+    .released(released)  
+);  
+
+always @(*) begin  
+    LED[0] = check;  
+    LED[1] = released;  
+    LED[2] = pressed;  
+end  
 
 endmodule

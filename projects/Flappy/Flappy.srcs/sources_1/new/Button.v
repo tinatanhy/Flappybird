@@ -3,29 +3,26 @@
 module Button (  
     input wire clk,       // 输入时钟  
     input wire BTNC,      // 中间按钮  
-    output reg [2:0] LED  // LED 输出  
+    output reg pressed,   // 按钮被按下的状态  
+    output reg check,     // 按钮当前状态  
+    output reg released    // 按钮被释放的状态  
 );  
     reg BTNC_last;        // 用于存储上一个按钮状态  
 
-    always @(posedge clk) begin  
-        // 更新 LED[0]，反映按钮状态  
-        LED[0] <= BTNC;   
-        
-        // 检测 BTNC 的上升沿  
+    always @(posedge clk) begin          
+        check <= BTNC;   
+               
         if (BTNC && !BTNC_last) begin   
-            LED[2] <= 1;   // 在上升沿时点亮 LED[2]  
+            pressed <= 1;   
         end else begin  
-            LED[2] <= 0;   // 其他情况下熄灭 LED[2]  
-        end  
-        
-        // 检测 BTNC 的下降沿  
+            pressed <= 0;   
+        end      
+
         if (!BTNC && BTNC_last) begin   
-            LED[1] <= 1;   // 在下降沿时点亮 LED[1]  
+            released <= 1;   
         end else begin  
-            LED[1] <= 0;   // 其他情况下熄灭 LED[1]  
-        end  
-        
-        // 更新上一个按钮状态  
+            released <= 0;   
+        end   
         BTNC_last <= BTNC;  
     end   
 endmodule
