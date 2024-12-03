@@ -2,5 +2,4 @@ projects/test/test.*/
 !projects/test/test.srcs/
 projects/Flappy/Flappy.*/
 !projects/Flappy/Flappy.srcs/
-projects/Flappy/Flappy.srcs/utils_*/
 bitstreams/
