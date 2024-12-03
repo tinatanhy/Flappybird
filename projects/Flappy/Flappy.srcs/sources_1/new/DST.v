@@ -43,10 +43,13 @@ CntS #(16,HSW_t) hcnt(          //每个时钟周期计数器增加1，表示扫
     .q          (q_h)
 );
 
-CntS #(16,VSW_t) vcnt(          //每行扫描完计数器增加1，表示扫描一行像素点
-    //TODO
-);
-
+CntS #(16, VSW_t) vcnt(           
+    .clk        (pclk),  
+    .rstn       (rstn),  
+    .d          (d_v),  
+    .ce         (ce_v),  
+    .q          (q_v)  
+); 
 always @(*) begin
     case (h_state)
         SW: begin
@@ -62,9 +65,23 @@ always @(*) begin
             d_h = HSW_t;  hs = 0; hen = 0;
         end
     endcase
-    case (v_state)
-        // TODO
-    endcase
+    case (v_state)  
+        SW: begin  
+            d_v = VBP_t;  vs = 1; ven = 0; 
+        end  
+        BP: begin  
+            d_v = VEN_t;  vs = 0; ven = 0; 
+        end  
+        EN: begin  
+            d_v = VFP_t;  vs = 0; ven = 1; 
+        end  
+        FP: begin  
+            d_v = VSW_t;  vs = 0; ven = 0; 
+        end  
+        default: begin  
+            d_v = 0; vs = 0; ven = 0; 
+        end  
+    endcase  
 end
 
 always @(posedge pclk) begin
