@@ -38,4 +38,22 @@ DST dst (
     .hs(hs),         //行同步
     .vs(vs)          //场同步
 );
+
+reg [31:0] cnt;
+initial begin
+    cnt = 0;
+end
+always @(posedge pclk) begin
+    if (!rstn) begin
+        cnt <= 0;
+    end
+    else begin
+        if(hen & ven) begin
+            cnt <= cnt + 1;
+        end
+    end
+end
+
+wire [31:0] hcnt = cnt % 800;
+wire [31:0] vcnt = cnt / 800;
 endmodule
