@@ -9,9 +9,9 @@ module DST (
 );
 
 localparam HSW_t    = 119;
-localparam HBP_t    = 63;
+localparam HBP_t    = 63 - 2;
 localparam HEN_t    = 799;
-localparam HFP_t    = 55;
+localparam HFP_t    = 55 + 2;
 
 localparam VSW_t    = 5;
 localparam VBP_t    = 22;

@@ -18,5 +18,5 @@ always @(posedge clk) begin
     sig_r2 <= sig_r1;
 end
 
-assign p = ~sig_r1 & sig_r2;
+assign p = sig_r1 & ~sig_r2;
 endmodule
