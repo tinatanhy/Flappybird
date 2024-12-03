@@ -1,7 +1,7 @@
 module ViewCore#(
-    parameter DW = 15,
-    parameter H_LEN = 200,
-    parameter V_LEN = 150
+    parameter DW = 19,
+    parameter H_LEN = 100,
+    parameter V_LEN = 75
 )(
     input clk,
     input rstn,
@@ -9,16 +9,16 @@ module ViewCore#(
     output [11:0] rgb
 );
 
-wire [DW-1:0] raddr;
+wire [DW-1:0] imgaddr, raddr;
 wire [11:0] rdata;
 wire hen, ven, pclk, locked;
 
 
-BRAM_12x32k vram_canvas (
+BRAM_Anim vram_canvas (
   .clka(clk),    
   .ena(1'b0),    
   .wea(1'b0),    
-  .addra(15'b0), 
+  .addra({DW{1'b0}}), 
   .dina(12'b0),   
   .clkb(clk),   
   .enb(1'b1),     
@@ -54,6 +54,17 @@ DDP#(
     .pclk(pclk),
     .rdata(rdata),
     .rgb(rgb),
+    .raddr(imgaddr)
+);
+AnimFrameCounter#(
+    .DW(DW),
+    .FRAME_SIZE(7500),
+    .FRAME_N(40)
+) framecounter (
+    .pclk(pclk), 
+    .rstn(rstn), 
+    .ven(ven),
+    .imgaddr(imgaddr),
     .raddr(raddr)
 );
 endmodule
