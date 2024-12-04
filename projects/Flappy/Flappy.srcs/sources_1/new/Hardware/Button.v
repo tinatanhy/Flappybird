@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps  
-
 module Button (  
     input wire clk,       // 输入时钟  
     input wire btn,       // 任意按钮型信号
