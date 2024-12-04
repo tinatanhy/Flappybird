@@ -14,10 +14,10 @@ ViewCore viewcore(
 );
 
 wire CLK72HZ;
-time72hz time72hz(
-    .pclk (CLK100MHZ),
-    .rstn (CPU_RESETN),
-    .clk_out(CLK72HZ)
+FrameClock time72hz(
+    .clk        (CLK100MHZ),
+    .rstn       (CPU_RESETN),
+    .clk_out    (CLK72HZ)
 );
 
 wire pressed;         
@@ -25,11 +25,11 @@ wire check;
 wire released;        
 
 Button button_inst (  
-    .clk(CLK72HZ),  
-    .btn(BTNC),  
-    .pressed(pressed),  
-    .check(check),  
-    .released(released)  
+    .clk        (CLK72HZ),  
+    .btn        (BTNC),  
+    .pressed    (pressed),  
+    .check      (check),  
+    .released   (released)  
 );  
 
 assign LED[0] = check;  

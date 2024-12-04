@@ -3,26 +3,21 @@
 module Button (  
     input wire clk,       // 输入时钟  
     input wire btn,       // 任意按钮型信号
-    output reg pressed,   // 按钮被按下的状态  
-    output reg check,     // 按钮当前状态  
-    output reg released    // 按钮被释放的状态  
+    output pressed, check, released
 );  
-    reg btn_last;        // 用于存储上一个按钮状态  
 
-    always @(posedge clk) begin          
-        check <= btn;   
-               
-        if (btn && !btn_last) begin   
-            pressed <= 1;   
-        end else begin  
-            pressed <= 0;   
-        end      
+// 其实就是双边沿检测。
+reg btn_r1, btn_r2;
+initial begin
+    btn_r1 = 1'b0;
+    btn_r2 = 1'b0;
+end
+always @(posedge clk) begin          
+    btn_r1 <= btn;  
+    btn_r2 <= btn_r1;
+end   
 
-        if (!btn && btn_last) begin   
-            released <= 1;   
-        end else begin  
-            released <= 0;   
-        end   
-        btn_last <= btn;  
-    end   
+assign check    =  btn_r1;
+assign pressed  =  btn_r1 & ~btn_r2;
+assign released = ~btn_r1 &  btn_r2;
 endmodule
