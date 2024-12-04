@@ -1,6 +1,7 @@
 module Top(
     input CLK100MHZ, CPU_RESETN, BTNC,
     output VGA_HS, VGA_VS,
+    output [2:0] LED,
     output [3:0] VGA_R, VGA_G, VGA_B
 );
 
