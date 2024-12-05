@@ -29,14 +29,13 @@
 
 
 ```
-0		Land		12*12			
-144		Tube		26*7
-326		Tutorial	57*49
-3119	GameOver	96*21
-5135	Ready		92*25
-7435	Numbers 	120*18
-9595
-10240=10k*16
+Land		12*12			
+Tube		26*7
+
+Tutorial	57*49
+GameOver	96*21
+Ready		92*25
+Numbers 	120*18
 ```
 
 

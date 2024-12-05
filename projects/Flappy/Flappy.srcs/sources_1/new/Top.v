@@ -12,7 +12,7 @@ wire rstn = CPU_RESETN;
 wire btn = BTNC;
 wire wdata_finish, calc_finish;
 wire [2:0] calc_status;
-wire [6:0] calc_counter1;
+wire [31:0]            timer;
 wire [15:0] world_seed_input;
 wire [15:0]       world_seed;
 wire [1:0]       game_status;
@@ -78,8 +78,8 @@ CalcCore#(
 
     .finish                  (calc_finish),
     .calc_status             (calc_status),
-    .calc_counter1           (calc_counter1),
 
+    .timer_output            (timer),
     .world_seed_input        (world_seed_input),
     .world_seed_output       (world_seed),
     .game_status_output      (game_status),
@@ -113,6 +113,7 @@ ViewCore#(
     .clk              (clk),
     .rstn             (rstn),
 
+    .timer            (timer),
     .world_seed       (world_seed),
     .game_status      (game_status),
     .score            (score),
@@ -144,6 +145,7 @@ ViewCore#(
 // CalcCore 的测试信号
 wire View_CalcCore = SW[0];
 wire [15:0] LED_CalcCore;
+wire [6:0] CalcCoreWorkFlash = timer[6:0];
 assign LED_CalcCore[0]    = calc_status == 0;
 assign LED_CalcCore[1]    = calc_status == 1;
 assign LED_CalcCore[2]    = calc_status == 2;
@@ -152,14 +154,18 @@ assign LED_CalcCore[4]    = calc_status == 4;
 assign LED_CalcCore[5]    = calc_status == 5;
 assign LED_CalcCore[6]    = calc_status == 6;
 assign LED_CalcCore[7]    = calc_status == 7;
-assign LED_CalcCore[8]    = $unsigned(calc_counter1) < $unsigned(64);
+assign LED_CalcCore[8]    = $unsigned(CalcCoreWorkFlash) < $unsigned(64);
 assign LED_CalcCore[11:9] = p1_input;
 assign LED_CalcCore[13:12] = 2'b0;
 assign LED_CalcCore[15:14] = game_status;
 
 wire View_WorldSeed = SW[1];
 wire [15:0] LED_WorldSeed = world_seed;
+
+wire View_Timer = SW[2];
+wire [15:0] LED_Timer = timer[15:0];
 assign LED = LED_CalcCore & {16{View_CalcCore}}
-           | LED_WorldSeed & {16{View_WorldSeed}};
+           | LED_WorldSeed & {16{View_WorldSeed}}
+           | LED_Timer & {16{View_Timer}};
 
 endmodule

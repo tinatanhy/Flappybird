@@ -8,6 +8,7 @@ module ViewCore#(
     input clk,
     input rstn,
     input upd,
+    input [31:0]            timer,
     input [15:0]       world_seed,
     input [1:0]       game_status,
     input [15:0]            score,
@@ -38,17 +39,6 @@ wire [10:0] pixel_x, pixel_y;
 wire [DW-1:0] raddr;
 wire [11:0] rdata;
 wire hen, ven, pclk, locked;
-
-reg [31:0] timer;
-
-always @(posedge clk) begin
-    if(rstn == 1'b0) begin
-        timer <= 32'b0;
-    end
-    else begin
-        timer <= timer + 1;
-    end
-end
 
 ClkWizPCLK clkwiz_pclk
 (

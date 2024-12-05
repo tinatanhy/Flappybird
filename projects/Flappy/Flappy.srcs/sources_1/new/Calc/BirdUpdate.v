@@ -1,5 +1,6 @@
 module BirdUpdate#(
-    parameter BIRD_HSPEED = 3,
+    parameter BIRD_HSPEED = 2,
+    parameter BG_XRANGE = 12,
     parameter BIRD_INITAIL_Y = 176
 )(
     input clk,
@@ -12,10 +13,12 @@ module BirdUpdate#(
     output [1:0] bird_animation,
     output [7:0] bird_rotation,
     output reg [31:0] p1_bird_y,
-    output reg [31:0] p1_bird_velocity
+    output reg [31:0] p1_bird_velocity,
+    output reg [15:0] bg_xshift
 );
 // 鸟相关量的计算模块。
 // 主要计算：鸟的 y 坐标变化、鸟的 x 世界坐标变化、鸟的动画。
+// 因为比较相关所以背景计算也放在这里。可能比较乱。
 // 也可以分出多个子模块进行实现。
 assign finish = 1'b1;
 
@@ -31,6 +34,7 @@ always @(posedge clk) begin
         p1_bird_y[31:16] <= BIRD_INITAIL_Y;
         p1_bird_y[15:0]  <= 16'b0;
         p1_bird_velocity <= 32'b0;
+        bg_xshift <= 16'b0;
     end else begin
         if(upd) begin 
             bird_x <= bird_x + BIRD_HSPEED;
@@ -46,6 +50,12 @@ always @(posedge clk) begin
             end
             else if(p1_bird_y[31:16] <= BIRD_INITAIL_Y - 6) begin
                 idle_dir <= 0;
+            end
+
+            if(bg_xshift >= BG_XRANGE - BIRD_HSPEED) begin
+                bg_xshift <= bg_xshift + BIRD_HSPEED - BG_XRANGE;
+            end else begin
+                bg_xshift <= bg_xshift + BIRD_HSPEED;
             end
         end
     end

@@ -1,4 +1,5 @@
 module CalcCore#(
+    parameter BIRD_HSPEED = 2,
     parameter N_TUBE = 4,
     parameter IND_TUBE_INTERACT = 1
 )(
@@ -8,8 +9,8 @@ module CalcCore#(
     input upd,
     input [15:0] world_seed_input,
     output [2:0]      calc_status,
-    output reg [6:0]      calc_counter1,
     output finish,
+    output    [31:0]             timer_output,
     output reg [1:0]       game_status_output,
     output reg [15:0]       world_seed_output,
     output reg [15:0]            score_output,
@@ -56,17 +57,18 @@ wire    input_finish,
 reg [2:0] submodule_status;
 reg [2:0] submodule_status_next;
 reg [15:0] world_seed;
+reg [31:0] timer;
 assign finish = (submodule_status == 3'b111);
 assign calc_status = submodule_status;
 
 always @(posedge clk) begin
     if (!rstn) begin
         submodule_status <= 3'b000;
-        calc_counter1 <= 0;
+        timer <= 0;
     end else begin
         submodule_status <= submodule_status_next;
         if(upd) begin
-            calc_counter1 <= calc_counter1 + 1;
+            timer <= timer + 1;
             world_seed <= world_seed_input;
         end
     end
@@ -142,7 +144,7 @@ wire [7:0]  tube_spacing  [N_TUBE-1:0];
 wire [15:0] score;
 wire [1:0] bird_animation;
 wire [7:0] bird_rotation;
-wire [15:0] bg_xshift = 16'h0000;
+wire [15:0] bg_xshift;
 KeyInput input_p1(
     .upd        (input_gdata_upd),
     .btn        (btn),
@@ -157,7 +159,9 @@ GlobalDataUpdate globaldata(
     .upd        (input_gdata_upd),
     .finish     (globaldata_finish)
 );
-BirdUpdate bird_update(
+BirdUpdate#(
+    .BIRD_HSPEED (BIRD_HSPEED)
+) bird_update(
     .clk              (clk),
     .rstn             (rstn),
     .upd              (bird_tube_upd),
@@ -168,7 +172,8 @@ BirdUpdate bird_update(
     .p1_bird_y        (p1_bird_y),
     .p1_bird_velocity (p1_bird_velocity),
     .bird_animation   (bird_animation),
-    .bird_rotation    (bird_rotation)
+    .bird_rotation    (bird_rotation),
+    .bg_xshift        (bg_xshift)
 );
 TubeUpdate tube_update(
     .clk           (clk),
@@ -205,6 +210,7 @@ StatusUpdate status_update(
     .finish       (status_update_finish)
 );
 
+assign timer_output = timer;
 always @(*) begin
     if(submodule_status == 3'b111 || submodule_status == 3'b000) begin
              game_status_output =      game_status;
