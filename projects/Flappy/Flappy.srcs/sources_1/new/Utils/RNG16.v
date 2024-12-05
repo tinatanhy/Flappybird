@@ -1,6 +1,7 @@
 module RNG16(
     input clk,
     input rstn,
+    input upd,
     output finish,          // 生成完成信号
     output [15:0] rand16    // 16 位随机数
 );

@@ -1,4 +1,6 @@
-module DST (
+module DST#(
+    parameter  LATENCY = 2
+) (
     input                   [ 0 : 0]            rstn,
     input                   [ 0 : 0]            pclk,
 
@@ -9,9 +11,9 @@ module DST (
 );
 
 localparam HSW_t    = 119;
-localparam HBP_t    = 63 - 2;
+localparam HBP_t    = 63 - LATENCY;
 localparam HEN_t    = 799;
-localparam HFP_t    = 55 + 2;
+localparam HFP_t    = 55 + LATENCY;
 
 localparam VSW_t    = 5;
 localparam VBP_t    = 22;

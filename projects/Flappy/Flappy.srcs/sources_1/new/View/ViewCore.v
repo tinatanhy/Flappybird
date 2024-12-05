@@ -6,6 +6,7 @@ module ViewCore#(
     parameter IND_TUBE_INTERACT = 1
 )(
     input clk,
+    input pclk,
     input rstn,
     output hs, vs,
     output [11:0] rgb
@@ -16,6 +17,16 @@ wire [DW-1:0] raddr;
 wire [11:0] rgbimg, rgbuv, rdata;
 wire hen, ven, pclk, locked;
 
+reg [31:0] timer;
+
+always @(posedge clk) begin
+    if(rstn == 1'b0) begin
+        timer <= 32'b0;
+    end
+    else begin
+        timer <= timer + 1;
+    end
+end
 
 BRAM_Anim vram_canvas (
   .clka(clk),    
@@ -28,24 +39,15 @@ BRAM_Anim vram_canvas (
   .addrb(raddr), 
   .doutb(rgbimg)  
 );
-PixelRenderer pixelrenderer(
-    .clk(clk),
-    .rstn(rstn),
-    .pixel_x(pixel_x),
-    .pixel_y(pixel_y),
-    .rgb(rgbuv)
-);
-wire [23:0] rgbmultiply = rgbimg * rgbuv;
-assign rdata = rgbmultiply[23:12];
+
+assign rdata = (|rgbuv) ? rgbimg : 12'b0;
+
 ClkWizPCLK clkwiz_pclk
 (
-    // Clock out ports
-    .clk_out1(pclk),     // output clk_out1
-    // Status and control signals
-    .resetn(rstn), // input reset
-    .locked(locked),       // output locked
-    // Clock in ports
-    .clk_in1(clk)      // input clk_in1
+    .clk_out1(pclk),
+    .resetn(rstn),  
+    .locked(locked),
+    .clk_in1(clk)   
 );
 DST dst(
     .rstn(rstn),
@@ -56,8 +58,8 @@ DST dst(
     .vs(vs)
 );
 DDPGame#(
-    .H_LEN(H_LEN),
-    .V_LEN(V_LEN)
+    .H_LEN(800),
+    .V_LEN(600)
 ) ddp(
     .hen(hen),
     .ven(ven),
@@ -78,5 +80,13 @@ AnimFrameCounter#(
     .ven(ven),
     .imgaddr((pixel_y >> 3) * 100 + (pixel_x >> 3)),
     .raddr(raddr)
+);
+PixelRenderer pixelrenderer(
+    .clk(clk),
+    .rstn(rstn),
+    .pixel_x(pixel_x),
+    .pixel_y(pixel_y),
+    .timer(timer),
+    .rgb(rgbuv)
 );
 endmodule

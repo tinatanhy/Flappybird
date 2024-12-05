@@ -22,6 +22,7 @@ FrameClock time72hz(
 WorldData worlddata(
     .clk        (clk),
     .rstn       (rstn),
+    .upd        (upd),
     .finish     (wdata_finish),
     .world_seed (world_seed)
 );
@@ -43,7 +44,7 @@ ViewCore#(
     .IND_TUBE_INTERACT(IND_TUBE_INTERACT)
 ) viewcore(
     .clk (clk),
-    .rstn(rst),
+    .rstn(rstn),
     .hs  (VGA_HS),
     .vs  (VGA_VS),
     .rgb ({ VGA_R, VGA_G, VGA_B })

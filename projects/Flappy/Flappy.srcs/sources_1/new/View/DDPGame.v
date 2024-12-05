@@ -32,7 +32,7 @@ always @(posedge pclk) begin            //可能慢一个周期，改hen,ven即�
     else if(p) begin                
         rgb <= 0;
         pixel_x <= 0;
-        if(pixel_y == V_LEN) begin
+        if(pixel_y == V_LEN - 1) begin
             pixel_y = 0;
         end
         else begin
