@@ -82,3 +82,33 @@ endmodule
 
 ### 显示数据处理 DDP 的编写
 
+PS.v 是一个简单的边沿检测模块。
+
+```verilog
+module PS#(
+	parameter  WIDTH = 1
+) (
+	input             s,
+	input             clk,
+	output            p
+);
+
+reg sig_r1, sig_r2;
+initial begin
+    sig_r1 = 1'b0;
+    sig_r2 = 1'b0;
+end
+
+always @(posedge clk) begin
+    sig_r1 <= s;
+    sig_r2 <= sig_r1;
+end
+
+assign p = sig_r1 & ~sig_r2;
+endmodule
+```
+
+## Part2 游戏开发
+
+### CalcCore 的调度
+

@@ -6,8 +6,26 @@ module ViewCore#(
     parameter IND_TUBE_INTERACT = 1
 )(
     input clk,
-    input pclk,
     input rstn,
+    input upd,
+    input [15:0]       world_seed,
+    input [1:0]       game_status,
+    input [15:0]            score,
+    input [31:0]        tube_pos0,
+    input [15:0]     tube_height0,
+    input [7:0]     tube_spacing0,
+    input [31:0]        tube_pos1,
+    input [15:0]     tube_height1,
+    input [7:0]     tube_spacing1,
+    input [31:0]        tube_pos2,
+    input [15:0]     tube_height2,
+    input [7:0]     tube_spacing2,
+    input [31:0]        tube_pos3,
+    input [15:0]     tube_height3,
+    input [7:0]     tube_spacing3,
+    input [31:0]           bird_x,
+    input [31:0]        p1_bird_y,
+    input [31:0] p1_bird_velocity,
     output hs, vs,
     output [11:0] rgb
 );
@@ -28,19 +46,20 @@ always @(posedge clk) begin
     end
 end
 
-BRAM_Anim vram_canvas (
-  .clka(clk),    
-  .ena(1'b0),    
-  .wea(1'b0),    
-  .addra({DW{1'b0}}), 
-  .dina(12'b0),   
-  .clkb(clk),   
-  .enb(1'b1),     
-  .addrb(raddr), 
-  .doutb(rgbimg)  
-);
+// BRAM_Anim vram_canvas (
+//   .clka(clk),    
+//   .ena(1'b0),    
+//   .wea(1'b0),    
+//   .addra({DW{1'b0}}), 
+//   .dina(12'b0),   
+//   .clkb(clk),   
+//   .enb(1'b1),     
+//   .addrb(raddr), 
+//   .doutb(rgbimg)  
+// );
 
-assign rdata = (|rgbuv) ? rgbimg : 12'b0;
+// assign rdata = (|rgbuv) ? rgbimg : 12'b0;
+assign rdata = rgbuv;
 
 ClkWizPCLK clkwiz_pclk
 (
@@ -86,6 +105,24 @@ PixelRenderer pixelrenderer(
     .rstn(rstn),
     .pixel_x(pixel_x),
     .pixel_y(pixel_y),
+    .world_seed       (world_seed),
+    .game_status      (game_status),
+    .score            (score),
+    .tube_pos0        (tube_pos0),
+    .tube_height0     (tube_height0),
+    .tube_spacing0    (tube_spacing0),
+    .tube_pos1        (tube_pos1),
+    .tube_height1     (tube_height1),
+    .tube_spacing1    (tube_spacing1),
+    .tube_pos2        (tube_pos2),
+    .tube_height2     (tube_height2),
+    .tube_spacing2    (tube_spacing2),
+    .tube_pos3        (tube_pos3),
+    .tube_height3     (tube_height3),
+    .tube_spacing3    (tube_spacing3),
+    .bird_x           (bird_x),
+    .p1_bird_y        (p1_bird_y),
+    .p1_bird_velocity (p1_bird_velocity),
     .timer(timer),
     .rgb(rgbuv)
 );

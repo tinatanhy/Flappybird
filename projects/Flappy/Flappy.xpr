@@ -336,6 +336,7 @@
     <FileSet Name="BRAM_Anim" Type="BlockSrcs" RelSrcDir="$PSRCDIR/BRAM_Anim" RelGenDir="$PGENDIR/BRAM_Anim">
       <File Path="$PSRCDIR/sources_1/ip/BRAM_Anim/BRAM_Anim.xci">
         <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
