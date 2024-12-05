@@ -1,9 +1,3 @@
-module RNG16(
-    input clk,
-    input rstn,
-    output finish,          // 生成完成信号
-    output [15:0] rand16    // 16 位随机数
-);
 // TODO:
 // RNG 16 模块（16 位随机数生成器）：
 // 需要达成的效果：
@@ -21,9 +15,42 @@ module RNG16(
 //  我们希望玩家颜色、背景颜色对应的位数 [15:13] 更新更快，所以可以将计数器翻转后输出。
 //  你可以通过编写 Testbench 测试该模块。
 
-// 以下代码应在实现时删去
-assign finish = 1'b1;
-assign rand16 = 16'b0;
-// 以上代码应在实现时删去
+ module RNG16 (  
+    input wire clk,              // 输入时钟  
+    input wire rstn,            // 复位信号（低电平有效）  
+    input wire update,          // 更新信号，触发随机数生成  
+    output reg finish,          // 结束信号  
+    output reg [15:0] rand16    // 16位随机数  
+);  
+
+    reg [31:0] counter;         // 32位计数器  
+    reg [31:0] seed;            // 存储种子  
+    reg [31:0] simple_hash;     // 存储较为简单的哈希值  
+
+    // 计数器和状态管理  
+    always @(posedge clk) begin  
+        if (!rstn) begin  
+            // 复位状态  
+            simple_hash <= 0;
+            finish <= 0;  
+            counter <= 32'd0;    // 将计数器初始为 0  
+            rand16 <= 16'b0;     // 将 rand16 初始为 0  
+            seed <= 32'b0;       // 种子初始为 0  
+        end else begin  
+                // 仅在`finish`为0时更新计数器和种子  
+                counter <= counter + 114513;  
+                seed <= counter;  // 将计数器当前值作为种子  
+                finish <= 0;
+                // 当更新信号有效时，生成随机数  
+                simple_hash <= seed; 
+                if (update) begin  
+                    // 简单哈希生成  
+                    // 设置生成完成信号和生成的随机数  
+                    rand16 <= simple_hash[15:0]; // 取低16位作为随机数  
+                    finish <= 1;                 // 设置为完成状态  
+                end  
+                
+        end  
+    end  
 
 endmodule
