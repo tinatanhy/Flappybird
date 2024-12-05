@@ -102,6 +102,7 @@ AnimFrameCounter#(
 );
 PixelRenderer pixelrenderer(
     .clk(clk),
+    .pclk(pclk),
     .rstn(rstn),
     .pixel_x(pixel_x),
     .pixel_y(pixel_y),

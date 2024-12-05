@@ -110,15 +110,20 @@ ViewCore#(
 );
 
 // CalcCore 的测试信号
-assign LED[0]    = SW[0] & (calc_status == 0);
-assign LED[1]    = SW[0] & (calc_status == 1);
-assign LED[2]    = SW[0] & (calc_status == 2);
-assign LED[3]    = SW[0] & (calc_status == 3);
-assign LED[4]    = SW[0] & (calc_status == 4);
-assign LED[5]    = SW[0] & (calc_status == 5);
-assign LED[6]    = SW[0] & (calc_status == 6);
-assign LED[7]    = SW[0] & (calc_status == 7);
-assign LED[8]    = SW[0] & ($unsigned(calc_counter1) < $unsigned(64));
-assign LED[11:9] = SW[0] & (p1_input);
+wire View_CalcCore = SW[0];
+wire [15:0] LED_CalcCore;
+assign LED_CalcCore[0]    = calc_status == 0;
+assign LED_CalcCore[1]    = calc_status == 1;
+assign LED_CalcCore[2]    = calc_status == 2;
+assign LED_CalcCore[3]    = calc_status == 3;
+assign LED_CalcCore[4]    = calc_status == 4;
+assign LED_CalcCore[5]    = calc_status == 5;
+assign LED_CalcCore[6]    = calc_status == 6;
+assign LED_CalcCore[7]    = calc_status == 7;
+assign LED_CalcCore[8]    = $unsigned(calc_counter1) < $unsigned(64);
+assign LED_CalcCore[11:9] = p1_input;
+assign LED_CalcCore[13:12] = 2'b0;
+assign LED_CalcCore[15:14] = game_status;
+assign LED = LED_CalcCore & {16{View_CalcCore}};
 
 endmodule
