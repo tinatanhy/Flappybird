@@ -18,7 +18,7 @@
  module RNG16 (  
     input wire clk,              // 输入时钟  
     input wire rstn,            // 复位信号（低电平有效）  
-    input wire update,          // 更新信号，触发随机数生成  
+    input wire upd,          // 更新信号，触发随机数生成  
     output reg finish,          // 结束信号  
     output reg [15:0] rand16    // 16位随机数  
 );  
@@ -43,7 +43,7 @@
                 finish <= 0;
                 // 当更新信号有效时，生成随机数  
                 simple_hash <= seed; 
-                if (update) begin  
+                if (upd) begin  
                     // 简单哈希生成  
                     // 设置生成完成信号和生成的随机数  
                     rand16 <= simple_hash[15:0]; // 取低16位作为随机数  

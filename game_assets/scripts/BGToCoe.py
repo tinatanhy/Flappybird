@@ -6,7 +6,7 @@ file.write(";72k*12\nmemory_initialization_radix=16;\nmemory_initialization_vect
 size = 72*1024
 cnt = 0
 for k in range(0, 2):
-	img_raw = Image.open(f"./game_assets/bg_0.png")
+	img_raw = Image.open(f"./game_assets/bg_{k}.png")
 	print(k)
 	img = img_raw.convert("RGB")
 	img_w = img.size[0]

@@ -24,15 +24,19 @@ module ViewCore#(
     input [15:0]     tube_height3,
     input [7:0]     tube_spacing3,
     input [31:0]           bird_x,
+    input [31:0]         camera_x,
     input [31:0]        p1_bird_y,
     input [31:0] p1_bird_velocity,
+    input [15:0]        bg_xshift,
+    input [1:0]    bird_animation,
+    input [7:0]     bird_rotation,
     output hs, vs,
     output [11:0] rgb
 );
 
 wire [10:0] pixel_x, pixel_y;
 wire [DW-1:0] raddr;
-wire [11:0] rgbimg, rgbuv, rdata;
+wire [11:0] rdata;
 wire hen, ven, pclk, locked;
 
 reg [31:0] timer;
@@ -45,21 +49,6 @@ always @(posedge clk) begin
         timer <= timer + 1;
     end
 end
-
-// BRAM_Anim vram_canvas (
-//   .clka(clk),    
-//   .ena(1'b0),    
-//   .wea(1'b0),    
-//   .addra({DW{1'b0}}), 
-//   .dina(12'b0),   
-//   .clkb(clk),   
-//   .enb(1'b1),     
-//   .addrb(raddr), 
-//   .doutb(rgbimg)  
-// );
-
-// assign rdata = (|rgbuv) ? rgbimg : 12'b0;
-assign rdata = rgbuv;
 
 ClkWizPCLK clkwiz_pclk
 (
@@ -122,9 +111,13 @@ PixelRenderer pixelrenderer(
     .tube_height3     (tube_height3),
     .tube_spacing3    (tube_spacing3),
     .bird_x           (bird_x),
+    .camera_x         (camera_x),
     .p1_bird_y        (p1_bird_y),
     .p1_bird_velocity (p1_bird_velocity),
+    .bg_xshift        (bg_xshift),
+    .bird_animation   (bird_animation),
+    .bird_rotation    (bird_rotation),
     .timer(timer),
-    .rgb(rgbuv)
+    .rgb(rdata)
 );
 endmodule

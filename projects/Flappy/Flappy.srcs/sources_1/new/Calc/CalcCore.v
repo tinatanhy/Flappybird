@@ -6,11 +6,12 @@ module CalcCore#(
     input rstn,
     input btn,
     input upd,
-    input [15:0] world_seed,
+    input [15:0] world_seed_input,
     output [2:0]      calc_status,
     output reg [6:0]      calc_counter1,
     output finish,
     output reg [1:0]       game_status_output,
+    output reg [15:0]       world_seed_output,
     output reg [15:0]            score_output,
     output reg [31:0]        tube_pos0_output,
     output reg [15:0]     tube_height0_output,
@@ -24,9 +25,13 @@ module CalcCore#(
     output reg [31:0]        tube_pos3_output,
     output reg [15:0]     tube_height3_output,
     output reg [7:0]     tube_spacing3_output,
+    output reg [31:0]         camera_x_output,
     output reg [31:0]           bird_x_output,
     output reg [31:0]        p1_bird_y_output,
     output reg [31:0] p1_bird_velocity_output,
+    output reg [15:0]        bg_xshift_output,
+    output reg [1:0]    bird_animation_output,
+    output reg [7:0]     bird_rotation_output,
     output reg [2:0]          p1_input_output
 );
 // CalcCore: 各个子模块的调度模块
@@ -50,6 +55,7 @@ wire    input_finish,
 // 111: 设置 finish 为 1
 reg [2:0] submodule_status;
 reg [2:0] submodule_status_next;
+reg [15:0] world_seed;
 assign finish = (submodule_status == 3'b111);
 assign calc_status = submodule_status;
 
@@ -61,6 +67,7 @@ always @(posedge clk) begin
         submodule_status <= submodule_status_next;
         if(upd) begin
             calc_counter1 <= calc_counter1 + 1;
+            world_seed <= world_seed_input;
         end
     end
 end
@@ -133,6 +140,9 @@ wire [31:0] tube_pos      [N_TUBE-1:0];
 wire [15:0] tube_height   [N_TUBE-1:0];
 wire [7:0]  tube_spacing  [N_TUBE-1:0];
 wire [15:0] score;
+wire [1:0] bird_animation;
+wire [7:0] bird_rotation;
+wire [15:0] bg_xshift = 16'h0000;
 KeyInput input_p1(
     .upd        (input_gdata_upd),
     .btn        (btn),
@@ -156,7 +166,9 @@ BirdUpdate bird_update(
     .finish           (bird_update_finish),
     .bird_x           (bird_x),
     .p1_bird_y        (p1_bird_y),
-    .p1_bird_velocity (p1_bird_velocity)
+    .p1_bird_velocity (p1_bird_velocity),
+    .bird_animation   (bird_animation),
+    .bird_rotation    (bird_rotation)
 );
 TubeUpdate tube_update(
     .clk           (clk),
@@ -209,10 +221,15 @@ always @(*) begin
                tube_pos3_output =      tube_pos[3];
             tube_height3_output =   tube_height[3];
            tube_spacing3_output =  tube_spacing[3];
+                camera_x_output =           bird_x;
                   bird_x_output =           bird_x;
                p1_bird_y_output =        p1_bird_y;
         p1_bird_velocity_output = p1_bird_velocity;
-        p1_input_output         =         p1_input;
+               p1_input_output  =         p1_input;
+               bg_xshift_output =        bg_xshift;
+          bird_animation_output =   bird_animation;
+           bird_rotation_output =    bird_rotation;
+             world_seed_output  =       world_seed;
     end
 end
 // END SUBMODULES

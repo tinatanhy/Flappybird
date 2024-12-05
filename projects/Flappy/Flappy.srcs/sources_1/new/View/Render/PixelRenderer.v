@@ -21,8 +21,12 @@ module PixelRenderer(
     input [15:0]     tube_height3,
     input [7:0]     tube_spacing3,
     input [31:0]           bird_x,
+    input [31:0]         camera_x,
     input [31:0]        p1_bird_y,
     input [31:0] p1_bird_velocity,
+    input [15:0]        bg_xshift,
+    input [1:0]    bird_animation,
+    input [7:0]     bird_rotation,
     output [11:0] rgb
 );
 
@@ -30,7 +34,7 @@ wire [11:0] col_outside = 12'h222;
 
 wire [9:0] screen_x = pixel_x - 256;
 wire [9:0] screen_y = pixel_y - 44;
-wire [16:0] p1_bird_x_screen = 80;
+wire [16:0] p1_bird_x_screen = 80 + bird_x - camera_x;
 wire [16:0] p1_bird_y_screen = 400 - p1_bird_y[31:16];
 wire game_view = (pixel_x >= 256 && pixel_x <= 543 && pixel_y >= 44 && pixel_y <= 555);
 wire in_bird = (screen_x >= 80 - 24) && (screen_x <= 80 + 24) && (screen_y >= p1_bird_y_screen - 24) && (screen_y <= p1_bird_y_screen + 24);
@@ -43,9 +47,11 @@ BROM_Background_12x72k brom_bg (
   .douta(col_bg)    // output wire [11 : 0] douta
 );
 
+wire [1:0] bird_color = (&world_seed[14:13]) ? 2'b00 : world_seed[14:13];
+wire [1:0] bird_anim =  (&bird_animation) ? 2'b01 : bird_animation;
 wire [6:0] x_in_bird = ((screen_x - p1_bird_x_screen + 24) >> 1);
 wire [6:0] y_in_bird = ((screen_y - p1_bird_y_screen + 24) >> 1);
-wire [12:0] addr_bird = (x_in_bird + 24 * y_in_bird) & {13{in_bird}};
+wire [12:0] addr_bird = (x_in_bird + 24 * y_in_bird + 24 * 24 * bird_anim + 24 * 24 * 3 * bird_color) & {13{in_bird}};
 wire [15:0] col_bird;
 BROM_Bird_NoRotate_16x6k brom_bird (
   .clka(clk),         // input wire clka
