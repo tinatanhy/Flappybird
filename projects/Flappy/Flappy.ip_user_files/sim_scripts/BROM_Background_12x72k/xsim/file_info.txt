@@ -1,0 +1,2 @@
+BROM_Background_12x72k.v,verilog,xil_defaultlib,../../../../Flappy.gen/sources_1/ip/BROM_Background_12x72k/sim/BROM_Background_12x72k.v,
+glbl.v,Verilog,xil_defaultlib,glbl.v

@@ -13,5 +13,5 @@ parameter TUBE_HITBOX_R = 50;
 assign passed = bird_x >= tube_pos + TUBE_HITBOX_R;
 
 // TODO
-assign collide = 0;
+assign collide = ($signed(p1_bird_y) < 0) || 1'b1/*TODO*/;
 endmodule

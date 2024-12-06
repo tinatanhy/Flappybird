@@ -9,13 +9,11 @@ module StatusUpdate(
     input [15:0] tube_height,
     input [7:0]  tube_spacing,
     output finish,
-    output [15:0] score,
-    output [1:0] game_status
+    output reg [15:0] score,
+    output reg [1:0] game_status
 );
 // TODO
 assign finish = 1'b1;
-assign score = bird_x - 40 <= 0 ? 0 : ((bird_x - 40) >> 6);
-assign game_status = 2'b10;
 wire collide, passed;
 CollisionCheck collidsionCheck(
     .tube_pos(tube_pos),
@@ -30,6 +28,7 @@ CollisionCheck collidsionCheck(
 always @(posedge clk) begin
     if(rstn) begin
         game_status <= 2'b01;   // 后续会设置为 2'b00
+        score <= 0;
     end else begin
         if(upd) begin
             case(game_status)

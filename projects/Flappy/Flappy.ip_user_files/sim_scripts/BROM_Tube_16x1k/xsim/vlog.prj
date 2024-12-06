@@ -1,0 +1,7 @@
+verilog xil_defaultlib  \
+"../../../../Flappy.gen/sources_1/ip/BROM_Tube_16x1k/sim/BROM_Tube_16x1k.v" \
+
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

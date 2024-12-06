@@ -2,3 +2,4 @@ projects/test/test.*/
 !projects/test/test.srcs/
 projects/Flappy/Flappy.*/
 !projects/Flappy/Flappy.srcs/
+!projects/Flappy/Flappy.ip_user_files/

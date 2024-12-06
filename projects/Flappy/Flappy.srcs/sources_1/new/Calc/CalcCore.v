@@ -128,6 +128,7 @@ always @(*) begin
         3'b101: begin
             status_upd = 1'b1;
         end
+        default;
     endcase
 end
 // END STATE MACHINE

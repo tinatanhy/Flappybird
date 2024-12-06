@@ -1,0 +1,2 @@
+BRAM_12x32k.v,verilog,xil_defaultlib,../../../../Flappy.gen/sources_1/ip/BRAM_12x32k/sim/BRAM_12x32k.v,
+glbl.v,Verilog,xil_defaultlib,glbl.v

@@ -54,10 +54,10 @@ Hash32to16 hash32to16_3(
     .finish(finish3),
     .hash(hash3)
 );
-assign tube_pos0 = { 10'b0, score + 1, 6'b0 };
-assign tube_pos1 = { 10'b0, score + 2, 6'b0 };
-assign tube_pos2 = { 10'b0, score + 3, 6'b0 };
-assign tube_pos3 = { 10'b0, score + 4, 6'b0 };
+assign tube_pos0 = score == 0 ? -200 : (score + 1) << 7;
+assign tube_pos1 = (score + 2) << 7;
+assign tube_pos2 = (score + 3) << 7;
+assign tube_pos3 = (score + 4) << 7;
 assign tube_spacing0 = 100;
 assign tube_spacing1 = 100;
 assign tube_spacing2 = 100;

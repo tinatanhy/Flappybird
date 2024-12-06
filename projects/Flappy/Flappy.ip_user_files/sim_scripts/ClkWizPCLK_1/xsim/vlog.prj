@@ -1,0 +1,8 @@
+verilog xil_defaultlib --include "../../../ipstatic" \
+"../../../../Flappy.gen/sources_1/ip/ClkWizPCLK_1/ClkWizPCLK_clk_wiz.v" \
+"../../../../Flappy.gen/sources_1/ip/ClkWizPCLK_1/ClkWizPCLK.v" \
+
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

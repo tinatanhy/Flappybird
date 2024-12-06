@@ -447,7 +447,6 @@
     <FileSet Name="BROM_Tube_16x1k" Type="BlockSrcs" RelSrcDir="$PSRCDIR/BROM_Tube_16x1k" RelGenDir="$PGENDIR/BROM_Tube_16x1k">
       <File Path="$PSRCDIR/sources_1/ip/BROM_Tube_16x1k/BROM_Tube_16x1k.xci">
         <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
