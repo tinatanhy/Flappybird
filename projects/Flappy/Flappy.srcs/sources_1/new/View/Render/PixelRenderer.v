@@ -59,6 +59,16 @@ BROM_Land_12x1k brom_land (
   .douta(col_land)  // output wire [11 : 0] douta
 );
 
+// Draw Tubes
+wire tube_mask = 1'b0;
+wire [9:0] addr_tube = land_x + land_y * 12;
+wire [11:0] col_tube;
+BROM_Tube_16x1k brom_tube (
+  .clka(clk),
+  .addra(addr_tube),
+  .douta(col_tube)
+);
+
 // Draw Bird
 wire [1:0] bird_color = (&world_seed[14:13]) ? 2'b00 : world_seed[14:13];
 wire [1:0] bird_anim =  (&bird_animation) ? 2'b01 : bird_animation;
@@ -79,5 +89,6 @@ assign rgb =
   (~screen_mask) ? col_outside :
   (bird_mask && col_bird[3]) ? col_bird[15:4] :
   (land_mask) ? col_land :
+  (tube_mask) ? col_tube :
   col_bg;
 endmodule

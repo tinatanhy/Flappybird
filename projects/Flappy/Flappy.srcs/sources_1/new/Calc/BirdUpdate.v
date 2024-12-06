@@ -37,26 +37,53 @@ always @(posedge clk) begin
         bg_xshift <= 16'b0;
     end else begin
         if(upd) begin 
-            bird_x <= bird_x + BIRD_HSPEED;
-            bird_anim_cnt <= bird_anim_cnt + 1;
-            // 这个其实是 game_status==2'b01 时的行为（上下移动）。到时候实现的时候直接抄就好。
-            if(idle_dir == 0) begin
-                p1_bird_y <= p1_bird_y + 31'h00008000;  // 加上的数是 0.5
-            end else begin
-                p1_bird_y <= p1_bird_y - 31'h00008000;
-            end
-            if(p1_bird_y[31:16] >= BIRD_INITAIL_Y + 6) begin
-                idle_dir <= 1;
-            end
-            else if(p1_bird_y[31:16] <= BIRD_INITAIL_Y - 6) begin
-                idle_dir <= 0;
-            end
+            case(game_status)
+            2'b00:; // 初始化状态，do nothing
+            2'b01: begin
+                // 开始界面。鸟上下移动。
+                // 这个其实是 game_status==2'b01 时的行为（上下移动）。到时候实现的时候直接抄就好。
+                bird_x <= bird_x + BIRD_HSPEED;
+                bird_anim_cnt <= bird_anim_cnt + 1;
+                if(idle_dir == 0) begin
+                    p1_bird_y <= p1_bird_y + 31'h00008000;  // 加上的数是 0.5
+                end else begin
+                    p1_bird_y <= p1_bird_y - 31'h00008000;
+                end
+                if(p1_bird_y[31:16] >= BIRD_INITAIL_Y + 6) begin
+                    idle_dir <= 1;
+                end
+                else if(p1_bird_y[31:16] <= BIRD_INITAIL_Y - 6) begin
+                    idle_dir <= 0;
+                end
 
-            if(bg_xshift >= BG_XRANGE - BIRD_HSPEED) begin
-                bg_xshift <= bg_xshift + BIRD_HSPEED - BG_XRANGE;
-            end else begin
-                bg_xshift <= bg_xshift + BIRD_HSPEED;
+                if(bg_xshift >= BG_XRANGE - BIRD_HSPEED) begin
+                    bg_xshift <= bg_xshift + BIRD_HSPEED - BG_XRANGE;
+                end else begin
+                    bg_xshift <= bg_xshift + BIRD_HSPEED;
+                end
+                
+                // TODO
+                // 因为我的设计，在开始界面按下按键时，也要给鸟向上的速度。
+                // 记得实现一下。
+            end 
+            2'b10: begin
+                // TODO
+                // 游戏状态。
+                // 你要实现这个状态的行为：鸟竖直方向的重力、玩家对鸟的控制。
+                // 记得非阻塞赋值的特点。
+                // p1_input[0] 是 pressed 信号。
+                bird_x <= bird_x + BIRD_HSPEED;     // 世界坐标向右移动
+                bird_anim_cnt <= bird_anim_cnt + 1; // 播放动画
             end
+            2'b11: begin
+                // GAME OVER 状态。
+                // 暂时什么也不做。(Checkpoint 2)
+                // 可能需要鸟下坠。(Checkpoint 3)
+                bird_x <= bird_x;                   // 世界坐标不再移动
+                bird_anim_cnt <= bird_anim_cnt + 1; // 播放动画
+            end
+            default;
+            endcase
         end
     end
 end

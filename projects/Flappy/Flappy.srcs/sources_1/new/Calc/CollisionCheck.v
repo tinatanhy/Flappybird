@@ -7,7 +7,11 @@ module CollisionCheck(
     output collide,
     output passed
 );
+
+parameter TUBE_HITBOX_L = 2;
+parameter TUBE_HITBOX_R = 50;
+assign passed = bird_x >= tube_pos + TUBE_HITBOX_R;
+
 // TODO
 assign collide = 0;
-assign passed = 0;
 endmodule

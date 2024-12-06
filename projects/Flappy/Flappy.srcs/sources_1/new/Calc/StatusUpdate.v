@@ -26,4 +26,34 @@ CollisionCheck collidsionCheck(
     .collide(collide),
     .passed(passed)
 );
+
+always @(posedge clk) begin
+    if(rstn) begin
+        game_status <= 2'b01;   // 后续会设置为 2'b00
+    end else begin
+        if(upd) begin
+            case(game_status)
+            2'b00: begin
+                game_status <= 2'b01;
+            end
+            2'b01: begin
+                if(p1_input[0]) begin
+                    game_status <= 2'b10;
+                end
+            end
+            2'b10: begin
+                if(collide) begin
+                    game_status <= 2'b11;
+                end
+                if(passed) begin
+                    score <= score + 1;
+                end
+            end
+            2'b11: begin
+                // Do Nothing
+            end
+            endcase
+        end
+    end
+end
 endmodule
