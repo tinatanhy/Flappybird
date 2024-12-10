@@ -8,12 +8,11 @@ module StatusUpdate(
     input [31:0] tube_pos,
     input [15:0] tube_height,
     input [7:0]  tube_spacing,
-    output finish,
+    output reg finish,
     output reg [15:0] score,
     output reg [1:0] game_status
 );
 // TODO
-assign finish = 1'b1;
 wire collide, passed;
 CollisionCheck collidsionCheck(
     .tube_pos(tube_pos),
@@ -26,9 +25,10 @@ CollisionCheck collidsionCheck(
 );
 
 always @(posedge clk) begin
-    if(rstn) begin
+    if(~rstn) begin
         game_status <= 2'b01;   // 后续会设置为 2'b00
         score <= 0;
+        finish = 0;
     end else begin
         if(upd) begin
             case(game_status)
@@ -36,8 +36,12 @@ always @(posedge clk) begin
                 game_status <= 2'b01;
             end
             2'b01: begin
-                if(p1_input[0]) begin
-                    game_status <= 2'b10;
+                // if(p1_input[0]) begin
+                //     game_status <= 2'b10;
+                // end
+                // 后续会删除
+                if(passed) begin
+                    score <= score + 1;
                 end
             end
             2'b10: begin
@@ -52,6 +56,7 @@ always @(posedge clk) begin
                 // Do Nothing
             end
             endcase
+            finish <= 1;
         end
     end
 end

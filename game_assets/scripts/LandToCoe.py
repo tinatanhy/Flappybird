@@ -27,6 +27,6 @@ for j in range(0,img_h):
 	file.write("\n")
 
 for i in range(0,dep * 1024 - size):
-	file.write("000 ")
+	file.write("DD9 ")
 file.write("\n;")
 print("Finish")
