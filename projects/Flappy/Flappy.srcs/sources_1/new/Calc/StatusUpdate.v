@@ -26,8 +26,8 @@ CollisionCheck collidsionCheck(
 );
 
 always @(posedge clk) begin
-    if(rstn) begin
-        game_status <= 2'b01;   // 后续会设置为 2'b00
+    if(~rstn) begin
+        game_status <= 2'b10;   // 后续会设置为 2'b00
         score <= 0;
     end else begin
         if(upd) begin

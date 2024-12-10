@@ -112,7 +112,6 @@ ViewCore#(
 ) viewcore(
     .clk              (clk),
     .rstn             (rstn),
-
     .timer            (timer),
     .world_seed       (world_seed),
     .game_status      (game_status),
@@ -167,5 +166,4 @@ wire [15:0] LED_Timer = timer[15:0];
 assign LED = LED_CalcCore & {16{View_CalcCore}}
            | LED_WorldSeed & {16{View_WorldSeed}}
            | LED_Timer & {16{View_Timer}};
-
 endmodule
