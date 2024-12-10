@@ -4,6 +4,7 @@ module TubeUpdate(
     input upd,
     input [12:0] seed,
     input [15:0] score,
+    input [31:0] bird_start_x,
     output finish,
     output [15:0]  debug_status,
     output reg [31:0]     tube_pos0,
@@ -66,11 +67,11 @@ Hash32to16 hash32to16_3(
     .finish(finish3),
     .hash(hash3)
 );
-assign tube_pos0_calc = score == 0 ? -200 : 
-                        (((score + 2) << 7) + ((score + 2) << 6));
-assign tube_pos1_calc = ((score + 3) << 7) + ((score + 3) << 6);
-assign tube_pos2_calc = ((score + 4) << 7) + ((score + 4) << 6);
-assign tube_pos3_calc = ((score + 5) << 7) + ((score + 5) << 6);
+assign tube_pos0_calc = bird_start_x + ((score == 0) ? -200 : 
+                                       (((score + 1) << 7) + ((score + 1) << 6)));
+assign tube_pos1_calc = bird_start_x + (((score + 2) << 7) + ((score + 2) << 6));
+assign tube_pos2_calc = bird_start_x + (((score + 3) << 7) + ((score + 3) << 6));
+assign tube_pos3_calc = bird_start_x + (((score + 4) << 7) + ((score + 4) << 6));
 assign tube_spacing0_calc = 120;
 assign tube_spacing1_calc = 120;
 assign tube_spacing2_calc = 120;

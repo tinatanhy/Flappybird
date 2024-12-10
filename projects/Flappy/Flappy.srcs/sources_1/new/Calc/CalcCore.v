@@ -7,6 +7,7 @@ module CalcCore#(
     input rstn,
     input btn,
     input upd,
+    input retry,
     input [15:0] world_seed_input,
     output [2:0]      calc_status,
     output [15:0]        calc_debug_led,
@@ -141,6 +142,7 @@ end
 wire [2:0] p1_input;
 wire [1:0] game_status;
 wire [31:0] bird_x;
+wire [31:0] bird_start_x;
 wire [31:0] p1_bird_y;
 wire [31:0] p1_bird_velocity;
 wire [31:0] tube_pos      [N_TUBE-1:0];
@@ -178,6 +180,7 @@ BirdUpdate#(
     .p1_bird_velocity (p1_bird_velocity),
     .bird_animation   (bird_animation),
     .bird_rotation    (bird_rotation),
+    .bird_start_x     (bird_start_x),
     .bg_xshift        (bg_xshift)
 );
 
@@ -190,6 +193,7 @@ TubeUpdate tube_update(
     .score         (score_output), // 为了稳定性
     .finish        (tube_update_finish),
     .debug_status  (calc_debug_led),
+    .bird_start_x  (bird_start_x),
     .tube_pos0     (tube_pos[0]),
     .tube_height0  (tube_height[0]),
     .tube_spacing0 (tube_spacing[0]),
@@ -207,9 +211,10 @@ StatusUpdate status_update(
     .clk          (clk),
     .rstn         (rstn),
     .upd          (status_upd),
+    .retry        (retry),
     .p1_input     (p1_input),
     .bird_x       (bird_x),
-    .p1_bird_y    (p1_bird_y),
+    .p1_bird_y    (p1_bird_y[31:16]),
     .tube_pos     (tube_pos[IND_TUBE_INTERACT]),
     .tube_height  (tube_height[IND_TUBE_INTERACT]),
     .tube_spacing (tube_spacing[IND_TUBE_INTERACT]),

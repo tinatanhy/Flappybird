@@ -2,6 +2,7 @@ module StatusUpdate(
     input clk,
     input rstn,
     input upd,
+    input retry,
     input [2:0] p1_input,
     input [31:0] bird_x,
     input [31:0] p1_bird_y,
@@ -26,20 +27,23 @@ CollisionCheck collidsionCheck(
 
 always @(posedge clk) begin
     if(~rstn) begin
-        game_status <= 2'b10;   // 后续会设置为 2'b00
+        game_status <= 2'b00;   // 后续会设置为 2'b00
         score <= 0;
         finish = 0;
     end else begin
+        if(retry) begin
+            game_status <= 2'b00;
+        end
         if(upd) begin
             case(game_status)
             2'b00: begin
                 game_status <= 2'b01;
+                score <= 0;
             end
             2'b01: begin
-                // if(p1_input[0]) begin
-                //     game_status <= 2'b10;
-                // end
-                // 后续会删除
+                if(p1_input[0]) begin
+                    game_status <= 2'b10;
+                end
                 if(passed) begin
                     score <= score + 1;
                 end
@@ -53,7 +57,9 @@ always @(posedge clk) begin
                 end
             end
             2'b11: begin
-                // Do Nothing
+                if(p1_input[0]) begin
+                    game_status <= 2'b00;
+                end
             end
             endcase
             finish <= 1;

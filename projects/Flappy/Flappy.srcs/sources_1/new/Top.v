@@ -45,17 +45,25 @@ wire [1:0]    bird_animation;
 wire [7:0]     bird_rotation;
 
 // Retry Module
-wire retry_pressed, retry_upd;
+wire retry_pressed, retry_pressed_posedge;
+wire retry_status, retry_status_posedge;
+assign retry_status = game_status == 2'b00;
 Button button_retry(
     .clk(upd),
     .btn(BTNU),
     .pressed(retry_pressed)
 );
-PS retry_ps(
+PS retry_btn_ps(
     .clk(upd),
     .s(retry_pressed),
-    .p(retry_upd)
+    .p(retry_pressed_posedge)
 );
+PS retry_status_ps(
+    .clk(upd),
+    .s(retry_status),
+    .p(retry_status_posedge)
+);
+wire retry_upd = retry_pressed_posedge || retry_status_posedge;
 // End Retry Module
 
 wire upd;
@@ -81,6 +89,7 @@ CalcCore#(
     .rstn                    (rstn),
     .btn                     (btn),
     .upd                     (upd),
+    .retry                   (retry_pressed),
 
     .finish                  (calc_finish),
     .calc_status             (calc_status),
@@ -225,13 +234,26 @@ always @(*) begin
         SegMask = 8'b1111_1111;
     end
     16'b0000_0000_0000_0011: begin
-        LEDData = calc_debug_led;
-        SegData = calc_debug_seg;
-        SegMask = 8'b1111_1111;
-    end
-    16'b0000_0000_0000_0101: begin
-        LEDData = view_debug_led;
-        SegData = view_debug_seg;
+        LEDData[0]    = calc_status == 0;
+        LEDData[1]    = calc_status == 1;
+        LEDData[2]    = calc_status == 2;
+        LEDData[3]    = calc_status == 3;
+        LEDData[4]    = calc_status == 4;
+        LEDData[5]    = calc_status == 5;
+        LEDData[6]    = calc_status == 6;
+        LEDData[7]    = calc_status == 7;
+        LEDData[8]    = $unsigned(timer[6:0]) < $unsigned(64);
+        LEDData[11:9] = p1_input;
+        LEDData[13:12] = 2'b0;
+        LEDData[15:14] = game_status;
+        SegData[31:28] = (p1_bird_y[31:16] / 1000) % 10;
+        SegData[27:24] = (p1_bird_y[31:16] / 100) % 10;
+        SegData[23:20] = (p1_bird_y[31:16] / 10) % 10;
+        SegData[19:16] = (p1_bird_y[31:16]) % 10;
+        SegData[15:12] = (p1_bird_velocity[31:16] / 1000) % 10;
+        SegData[11: 8] = (p1_bird_velocity[31:16] / 100) % 10;
+        SegData[ 7: 4] = (p1_bird_velocity[31:16] / 10) % 10;
+        SegData[ 3: 0] = (p1_bird_velocity[31:16]) % 10;
         SegMask = 8'b1111_1111;
     end
     endcase
