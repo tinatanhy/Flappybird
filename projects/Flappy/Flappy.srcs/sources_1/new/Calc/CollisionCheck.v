@@ -11,7 +11,6 @@ module CollisionCheck(
 parameter TUBE_HITBOX_L = 2;
 parameter TUBE_HITBOX_R = 50;
 assign passed = bird_x >= tube_pos + TUBE_HITBOX_R;
-
 // TODO
-assign collide = ($signed(p1_bird_y) < 0) || 1'b1/*TODO*/;
+assign collide = ($signed(p1_bird_y) < 0) || (bird_x <= tube_pos + TUBE_HITBOX_R)&&(bird_x >= tube_pos + TUBE_HITBOX_L)&&((p1_bird_y <= tube_height)||p1_bird_y >= tube_height + tube_spacing)/*TODO*/;
 endmodule

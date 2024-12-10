@@ -2,10 +2,10 @@
 // Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
-// Date        : Thu Dec  5 21:50:10 2024
-// Host        : rubatoPC running 64-bit major release  (build 9200)
-// Command     : write_verilog -force -mode synth_stub -rename_top BROM_Land_12x1k -prefix
-//               BROM_Land_12x1k_ BROM_Land_12x1k_stub.v
+// Date        : Sat Dec  7 00:17:57 2024
+// Host        : tina running 64-bit major release  (build 9200)
+// Command     : write_verilog -force -mode synth_stub
+//               d:/fpgaflappy/projects/Flappy/Flappy.gen/sources_1/ip/BROM_Land_12x1k/BROM_Land_12x1k_stub.v
 // Design      : BROM_Land_12x1k
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7a100tcsg324-1

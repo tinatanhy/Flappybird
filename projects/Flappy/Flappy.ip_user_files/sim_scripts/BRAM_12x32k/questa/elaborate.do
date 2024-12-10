@@ -1,1 +1,0 @@
-vopt +acc=npr -l elaborate.log +acc=npr -suppress 10016  -L xil_defaultlib -L blk_mem_gen_v8_4_6 -L unisims_ver -L unimacro_ver -L secureip -work xil_defaultlib xil_defaultlib.BRAM_12x32k xil_defaultlib.glbl -o BRAM_12x32k_opt

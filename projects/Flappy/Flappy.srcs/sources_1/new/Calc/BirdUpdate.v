@@ -23,6 +23,7 @@ module BirdUpdate#(
 assign finish = 1'b1;
 
 reg [4:0] bird_anim_cnt;
+
 assign bird_animation = bird_anim_cnt[4:3];
 assign bird_rotation = 0;
 
@@ -35,6 +36,7 @@ always @(posedge clk) begin
         p1_bird_y[15:0]  <= 16'b0;
         p1_bird_velocity <= 32'b0;
         bg_xshift <= 16'b0;
+      
     end else begin
         if(upd) begin 
             case(game_status)
@@ -63,10 +65,23 @@ always @(posedge clk) begin
                 end
                 
                 // TODO
-                // 因为我的设计，在开始界面按下按键时，也要给鸟向上的速度。
+                if(p1_input[0])begin
+                    p1_bird_velocity <= 32'h00058000;
+                end// 因为我的设计，在开始界面按下按键时，也要给鸟向上的速度。
                 // 记得实现一下。
             end 
             2'b10: begin
+
+                if(p1_input[0])begin
+                    p1_bird_velocity <= 32'h00058000;
+                 
+                end
+                else begin
+                    p1_bird_velocity <= p1_bird_velocity - 32'h00004400 ;
+                
+                end
+
+                p1_bird_y <= p1_bird_y + p1_bird_velocity;
                 // TODO
                 // 游戏状态。
                 // 你要实现这个状态的行为：鸟竖直方向的重力、玩家对鸟的控制。
