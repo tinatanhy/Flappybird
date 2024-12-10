@@ -9,7 +9,9 @@ module CalcCore#(
     input upd,
     input [15:0] world_seed_input,
     output [2:0]      calc_status,
-    output finish,
+    output [15:0]        calc_debug_led,
+    output [31:0]        calc_debug_seg,
+    output reg finish,
     output    [31:0]             timer_output,
     output reg [1:0]       game_status_output,
     output reg [15:0]       world_seed_output,
@@ -58,7 +60,7 @@ reg [2:0] submodule_status;
 reg [2:0] submodule_status_next;
 reg [15:0] world_seed;
 reg [31:0] timer;
-assign finish = (submodule_status == 3'b111);
+// assign finish = (submodule_status == 3'b111);
 assign calc_status = submodule_status;
 
 always @(posedge clk) begin
@@ -107,9 +109,7 @@ always @(*) begin
             end
         end
         3'b111: begin
-            if(upd) begin
-                submodule_status_next = 3'b001;
-            end
+            submodule_status_next = 3'b000;
         end
     endcase
 end
@@ -118,6 +118,7 @@ always @(*) begin
     input_gdata_upd = 1'b0;
     bird_tube_upd = 1'b0;
     status_upd = 1'b0;
+    finish = 1'b0;
     case(submodule_status) 
         3'b001: begin
             input_gdata_upd = 1'b1;
@@ -127,6 +128,9 @@ always @(*) begin
         end
         3'b101: begin
             status_upd = 1'b1;
+        end
+        3'b111: begin
+            finish = 1'b1;
         end
         default;
     endcase
@@ -176,13 +180,16 @@ BirdUpdate#(
     .bird_rotation    (bird_rotation),
     .bg_xshift        (bg_xshift)
 );
+
+assign calc_debug_seg = 16'b0;
 TubeUpdate tube_update(
     .clk           (clk),
     .rstn          (rstn),
     .upd           (bird_tube_upd),
     .seed          (world_seed[12:0]),
-    .score         (score),
+    .score         (score_output), // 为了稳定性
     .finish        (tube_update_finish),
+    .debug_status  (calc_debug_led),
     .tube_pos0     (tube_pos[0]),
     .tube_height0  (tube_height[0]),
     .tube_spacing0 (tube_spacing[0]),
@@ -212,31 +219,38 @@ StatusUpdate status_update(
 );
 
 assign timer_output = timer;
-always @(*) begin
-    if(submodule_status == 3'b111 || submodule_status == 3'b000) begin
-             game_status_output =      game_status;
-                   score_output =            score;
-               tube_pos0_output =      tube_pos[0];        
-            tube_height0_output =   tube_height[0];
-           tube_spacing0_output =  tube_spacing[0];
-               tube_pos1_output =      tube_pos[1];
-            tube_height1_output =   tube_height[1];
-           tube_spacing1_output =  tube_spacing[1];
-               tube_pos2_output =      tube_pos[2];
-            tube_height2_output =   tube_height[2];
-           tube_spacing2_output =  tube_spacing[2];        
-               tube_pos3_output =      tube_pos[3];
-            tube_height3_output =   tube_height[3];
-           tube_spacing3_output =  tube_spacing[3];
-                camera_x_output =           bird_x;
-                  bird_x_output =           bird_x;
-               p1_bird_y_output =        p1_bird_y;
-        p1_bird_velocity_output = p1_bird_velocity;
-               p1_input_output  =         p1_input;
-               bg_xshift_output =        bg_xshift;
-          bird_animation_output =   bird_animation;
-           bird_rotation_output =    bird_rotation;
-             world_seed_output  =       world_seed;
+reg lock;
+initial begin
+    lock = 1;
+end
+always @(posedge clk) begin
+    if(!rstn || (submodule_status == 3'b111 && !lock)) begin
+             game_status_output <=      game_status;
+                   score_output <=            score;
+               tube_pos0_output <=      tube_pos[0];        
+            tube_height0_output <=   tube_height[0];
+           tube_spacing0_output <=  tube_spacing[0];
+               tube_pos1_output <=      tube_pos[1];
+            tube_height1_output <=   tube_height[1];
+           tube_spacing1_output <=  tube_spacing[1];
+               tube_pos2_output <=      tube_pos[2];
+            tube_height2_output <=   tube_height[2];
+           tube_spacing2_output <=  tube_spacing[2];        
+               tube_pos3_output <=      tube_pos[3];
+            tube_height3_output <=   tube_height[3];
+           tube_spacing3_output <=  tube_spacing[3];
+                camera_x_output <=           bird_x;
+                  bird_x_output <=           bird_x;
+               p1_bird_y_output <=        p1_bird_y;
+        p1_bird_velocity_output <= p1_bird_velocity;
+               p1_input_output  <=         p1_input;
+               bg_xshift_output <=        bg_xshift;
+          bird_animation_output <=   bird_animation;
+           bird_rotation_output <=    bird_rotation;
+             world_seed_output  <=       world_seed;
+        lock <= 1;
+    end else if(submodule_status == 3'b000) begin
+        lock <= 0;
     end
 end
 // END SUBMODULES
