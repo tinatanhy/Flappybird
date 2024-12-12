@@ -339,8 +339,17 @@ always @(*) begin
         SegData[ 3: 0] = (p1_bird_velocity[31:16]) % 10;
         SegMask = 8'b1111_1111;
     end
+    16'b0000_0000_0000_0111: begin
+        LEDData = calc_debug_led;
+        SegData = calc_debug_seg;
+        SegMask = 8'b1111_1111;
+    end
+    16'b0000_0000_0000_1111: begin
+        LEDData = view_debug_led;
+        SegData = view_debug_seg;
+        SegMask = 8'b1111_1111;
+    end
     endcase
-    
 end
 
 assign LED = LEDData;

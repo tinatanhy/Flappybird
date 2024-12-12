@@ -1,0 +1,2 @@
+BROM_Bird32.v,verilog,xil_defaultlib,../../../../Flappy.gen/sources_1/ip/BROM_Bird32/sim/BROM_Bird32.v,
+glbl.v,Verilog,xil_defaultlib,glbl.v

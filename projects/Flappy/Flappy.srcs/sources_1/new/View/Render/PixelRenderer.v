@@ -46,17 +46,17 @@ always @(posedge pclk) begin
 end
 
 // wire [11:0] col_outside = 12'h222;
-wire [10:0] grid_x = pixel_x >> 4, grid_y = pixel_y >> 4;
+wire [10:0] grid_x = pixel_x >> 5, grid_y = pixel_y >> 5;
 wire [11:0] col_outside = (grid_x[0] ^ grid_y[0]) ? 12'h333 : 12'h222;
 
-wire [15:0] screen_x = $signed(pixel_x - 256 + shake_x);
-wire [15:0] screen_y = $signed(pixel_y - 44 + shake_y);
+wire [15:0] screen_x = $signed(pixel_x - 256 + $signed({{8{shake_x[7]}}, shake_x}));
+wire [15:0] screen_y = $signed(pixel_y - 44 +  $signed({{8{shake_y[7]}}, shake_y}));
 wire [15:0] game_x = camera_x + screen_x - 80;
 wire [15:0] game_y = 400 - screen_y;
 wire screen_mask = ($signed(screen_x) >= $signed(0) && $signed(screen_y) >= $signed(0) && $signed(screen_x) < $signed(288) && $signed(screen_y) < $signed(512));
 
 // Draw BG
-wire [16:0] addr_bg = (((screen_x - 1) >> 1) + 144 * (screen_y >> 1) + 144 * 256 * world_seed[15]) & {17{screen_mask}};
+wire [16:0] addr_bg = ((screen_x >> 1) + 144 * (screen_y >> 1) + 144 * 256 * world_seed[15]) & {17{screen_mask}};
 wire [11:0] col_bg;
 BROM_Background_12x72k brom_bg (
   .clka(clk),       // input wire clka
@@ -66,15 +66,19 @@ BROM_Background_12x72k brom_bg (
 
 // Draw Land
 wire land_mask = game_y[9];
-wire [4:0] land_x = ((game_x + 24 * 144) % 24) >>> 1;  // how to avoid %?
-wire [4:0] land_y = ($unsigned((screen_y - 401) >>> 1) > $unsigned(11)) ? 11 : $unsigned((screen_y - 401) >>> 1);
+wire [4:0] land_x = ((game_x + 192) % 24) >> 1;  // how to avoid %?
+wire [4:0] land_y = ($unsigned((screen_y - 401) >> 1) > $unsigned(11)) ? 11 : $unsigned((screen_y - 401) >> 1);
 wire [9:0] addr_land = land_mask ? (($unsigned(land_x) < 12 && $unsigned(land_y) < 12) ? (land_x + 12 * land_y) : 143) : 256;
-wire [11:0] col_land;
+wire [11:0] col_land0;
 BROM_Land_12x1k brom_land (
   .clka(clk),    // input wire clka
   .addra(addr_land),  // input wire [9 : 0] addra
-  .douta(col_land)  // output wire [11 : 0] douta
+  .douta(col_land0)  // output wire [11 : 0] douta
 );
+wire [11:0] col_land = {12{land_y <= 8}} & col_land0
+                     | {12{land_y == 9}} & 12'h582
+                     | {12{land_y == 10}} & 12'hDA4
+                     | {12{land_y >= 11}} & 12'hDD9;
 
 // Draw Tubes
 parameter TUBE_WIDTH = 52;
@@ -82,10 +86,10 @@ wire [15:0] tube_0_x = game_x - tube_pos0;
 wire [15:0] tube_1_x = game_x - tube_pos1;
 wire [15:0] tube_2_x = game_x - tube_pos2;
 wire [15:0] tube_3_x = game_x - tube_pos3;
-wire tube_mask_0_x =    $signed(tube_0_x) >= 0 && $signed(game_x) >= $signed(tube_pos0) && $signed(game_x) < $signed(tube_pos0 + TUBE_WIDTH);
-wire tube_mask_1_x =    $signed(tube_1_x) >= 0 && $signed(game_x) >= $signed(tube_pos1) && $signed(game_x) < $signed(tube_pos1 + TUBE_WIDTH);
-wire tube_mask_2_x =    $signed(tube_2_x) >= 0 && $signed(game_x) >= $signed(tube_pos2) && $signed(game_x) < $signed(tube_pos2 + TUBE_WIDTH);
-wire tube_mask_3_x =    $signed(tube_3_x) >= 0 && $signed(game_x) >= $signed(tube_pos3) && $signed(game_x) < $signed(tube_pos3 + TUBE_WIDTH);
+wire tube_mask_0_x =    $signed(tube_0_x) >= 0 && $signed(game_x) >= $signed(tube_pos0) && $signed(game_x) <= $signed(tube_pos0 + TUBE_WIDTH + 1);
+wire tube_mask_1_x =    $signed(tube_1_x) >= 0 && $signed(game_x) >= $signed(tube_pos1) && $signed(game_x) <= $signed(tube_pos1 + TUBE_WIDTH + 1);
+wire tube_mask_2_x =    $signed(tube_2_x) >= 0 && $signed(game_x) >= $signed(tube_pos2) && $signed(game_x) <= $signed(tube_pos2 + TUBE_WIDTH + 1);
+wire tube_mask_3_x =    $signed(tube_3_x) >= 0 && $signed(game_x) >= $signed(tube_pos3) && $signed(game_x) <= $signed(tube_pos3 + TUBE_WIDTH + 1);
 wire tube_mask_0_down = ($signed(game_y) <= $signed(tube_height0)) && tube_mask_0_x;
 wire tube_mask_1_down = ($signed(game_y) <= $signed(tube_height1)) && tube_mask_1_x;
 wire tube_mask_2_down = ($signed(game_y) <= $signed(tube_height2)) && tube_mask_2_x;
@@ -114,19 +118,25 @@ wire [9:0] tube_y = ({10{tube_mask_0_down}} & tube_0_down_y[9:0]
                   |  {10{tube_mask_1_up}}   &   tube_1_up_y[9:0]
                   |  {10{tube_mask_2_up}}   &   tube_2_up_y[9:0]
                   |  {10{tube_mask_3_up}}   &   tube_3_up_y[9:0]) >> 1;
-wire [3:0] tube_img_y = ($signed(tube_y) == 0) ? 0
-                      : ($signed(tube_y) == 1) ? 1
-                      : ($signed(tube_y) >= 2 && $signed(tube_y) <= 9) ? 2
-                      : ($signed(tube_y) == 10) ? 3
-                      : ($signed(tube_y) == 11) ? 0
-                      : ($signed(tube_y) == 12) ? 5
-                      : 6;
+wire [3:0] tube_img_y = {3{($signed(tube_y) == 0)}} & 4'd0
+                      | {3{($signed(tube_y) == 1)}} & 4'd1
+                      | {3{($signed(tube_y) >= 2 && $signed(tube_y) <= 9)}} & 4'd2
+                      | {3{($signed(tube_y) == 10)}} & 4'd3
+                      | {3{($signed(tube_y) == 11)}} & 4'd0
+                      | {3{($signed(tube_y) == 12)}} & 4'd5
+                      | {3{(tube_y > 12)}} & 4'd6;
 wire tube_place_mask = (tube_mask_0_up || tube_mask_0_down || tube_mask_1_up || tube_mask_1_down || tube_mask_2_up || tube_mask_2_down || tube_mask_3_up || tube_mask_3_down);
-wire [9:0] addr_tube = tube_place_mask ? (tube_img_y * 26 + tube_x) : 10'd256;
+// wire [9:0] addr_tube = tube_place_mask ? (tube_img_y * 26 + tube_x) : 10'd256;
+wire [11:0] addr_tube = tube_place_mask ? (tube_y * 26 + tube_x) : 12'd4095;
 wire [15:0] col_tube_0;
 wire [12:0] col_tube = col_tube_0[15:4];
 wire tube_mask = col_tube_0[3] & tube_place_mask;
-BROM_Tube_16x1k brom_tube (
+// BROM_Tube_16x1k brom_tube (
+//   .clka(clk),
+//   .addra(addr_tube),
+//   .douta(col_tube_0)
+// );
+BROM_Tube_16x4k brom_tube (
   .clka(clk),
   .addra(addr_tube),
   .douta(col_tube_0)
@@ -137,16 +147,109 @@ wire [1:0] bird_color = (&world_seed[14:13]) ? 2'b00 : world_seed[14:13];
 wire [1:0] bird_anim =  (&bird_animation) ? 2'b01 : bird_animation;
 wire [16:0] p1_bird_x_screen = 80 + bird_x - camera_x;
 wire [16:0] p1_bird_y_screen = 400 - p1_bird_y[31:16];
-wire [6:0] x_in_bird = ($signed(screen_x - p1_bird_x_screen + 24) >>> 1);
-wire [6:0] y_in_bird = ($signed(screen_y - p1_bird_y_screen + 24) >>> 1);
-wire bird_mask = (screen_x >= 80 - 24) && (screen_x <= 80 + 24) && ($signed(screen_y) >= $signed(p1_bird_y_screen - 24)) && ($signed(screen_y) <= $signed(p1_bird_y_screen + 24));
-wire [12:0] addr_bird = (x_in_bird + 24 * y_in_bird + 24 * 24 * bird_anim + 24 * 24 * 3 * bird_color) & {13{bird_mask}};
-wire [15:0] col_bird;
-BROM_Bird_NoRotate_16x6k brom_bird (
-  .clka(clk),         // input wire clka
-  .addra(addr_bird),  // input wire [12 : 0] addra
-  .douta(col_bird)    // output wire [15 : 0] douta
+wire [16:0] x_in_bird = $signed(screen_x - p1_bird_x_screen + 20);
+wire [16:0] y_in_bird = $signed(screen_y - p1_bird_y_screen + 20);
+wire bird_mask = (screen_x >= 80 - 20) && (screen_x <= 80 + 20) 
+                  && ($signed(screen_y) >= $signed(p1_bird_y_screen - 20)) 
+                  && ($signed(screen_y) <= $signed(p1_bird_y_screen + 20));
+wire [15:0] addr_bird = (x_in_bird + 40 * y_in_bird + 1600 * bird_rotation) & {16{bird_mask}};
+// BROM_Bird_NoRotate_16x6k brom_bird (
+//   .clka(clk),         // input wire clka
+//   .addra(addr_bird),  // input wire [12 : 0] addra
+//   .douta(col_bird)    // output wire [15 : 0] douta
+// );
+wire [15:0] col_bird00, col_bird01, col_bird02, col_bird10, col_bird11, col_bird12, col_bird20, col_bird21, col_bird22;
+localparam bird_col_black = 12'h534;
+localparam bird_col_white = 12'hfff;
+localparam bird_col_0_1   = 12'he82;
+localparam bird_col_0_2   = 12'hfb3;
+localparam bird_col_0_3   = 12'hfd8;
+localparam bird_col_0_4   = 12'hfd8;
+localparam bird_col_0_5   = 12'hf30;
+localparam bird_col_0_6   = 12'hdec;
+localparam bird_col_1_1   = 12'h4ad;
+localparam bird_col_1_2   = 12'h4cf;
+localparam bird_col_1_3   = 12'h5df;
+localparam bird_col_1_4   = 12'hfd8;
+localparam bird_col_1_5   = 12'he61;
+localparam bird_col_1_6   = 12'hdec;
+localparam bird_col_2_1   = 12'hd20;
+localparam bird_col_2_2   = 12'hf30;
+localparam bird_col_2_3   = 12'hf70;
+localparam bird_col_2_4   = 12'hdec;
+localparam bird_col_2_5   = 12'hfb3;
+localparam bird_col_2_6   = 12'hdec;
+BROM_Bird00 brom_bird00 (
+  .clka(clk),         
+  .addra(addr_bird),  
+  .douta(col_bird00)  
 );
+BROM_Bird01 brom_bird01 (
+  .clka(clk),         
+  .addra(addr_bird),  
+  .douta(col_bird01)  
+);
+BROM_Bird02 brom_bird02 (
+  .clka(clk),         
+  .addra(addr_bird),  
+  .douta(col_bird02)  
+);
+wire [15:0] col_bird = {16{bird_animation == 2'b00}} & col_bird00
+                        | {16{(bird_animation == 2'b01 || bird_animation == 2'b11)}} & col_bird01
+                        | {16{bird_animation == 2'b10}} & col_bird02;
+// wire [12:0] cbur = col_bird[15:12];
+// wire [12:0] cbug = col_bird[11:8];
+// wire [12:0] cbub = col_bird[7:4];
+// wire [11:0] cb1 = {16{(world_seed[14:13] == 2'b00 || world_seed[14:13] == 2'b11)}} & bird_col_0_1
+//                 | {16{(world_seed[14:13] == 2'b01)}} & bird_col_1_1
+//                 | {16{(world_seed[14:13] == 2'b10)}} & bird_col_2_1;
+// wire [11:0] cb2 = {16{(world_seed[14:13] == 2'b00 || world_seed[14:13] == 2'b11)}} & bird_col_0_2
+//                 | {16{(world_seed[14:13] == 2'b01)}} & bird_col_1_2
+//                 | {16{(world_seed[14:13] == 2'b10)}} & bird_col_2_2;                     
+// wire [11:0] cb3 = {16{(world_seed[14:13] == 2'b00 || world_seed[14:13] == 2'b11)}} & bird_col_0_3
+//                 | {16{(world_seed[14:13] == 2'b01)}} & bird_col_1_3
+//                 | {16{(world_seed[14:13] == 2'b10)}} & bird_col_2_3;
+// wire [11:0] cb4 = {16{(world_seed[14:13] == 2'b00 || world_seed[14:13] == 2'b11)}} & bird_col_0_4
+//                 | {16{(world_seed[14:13] == 2'b01)}} & bird_col_1_4
+//                 | {16{(world_seed[14:13] == 2'b10)}} & bird_col_2_4;
+// wire [11:0] cb5 = {16{(world_seed[14:13] == 2'b00 || world_seed[14:13] == 2'b11)}} & bird_col_0_5
+//                 | {16{(world_seed[14:13] == 2'b01)}} & bird_col_1_5
+//                 | {16{(world_seed[14:13] == 2'b10)}} & bird_col_2_5;
+// wire [11:0] cb6 = {16{(world_seed[14:13] == 2'b00 || world_seed[14:13] == 2'b11)}} & bird_col_0_6
+//                 | {16{(world_seed[14:13] == 2'b01)}} & bird_col_1_6
+//                 | {16{(world_seed[14:13] == 2'b10)}} & bird_col_2_6;
+// wire [3:0] cl1r = (cb1[11:8] * (4'b1111 - cbug) + cb2[11:8] * cbug) >> 4;
+// wire [3:0] cl1g = (cb1[ 7:4] * (4'b1111 - cbug) + cb2[ 7:4] * cbug) >> 4;
+// wire [3:0] cl1b = (cb1[ 3:0] * (4'b1111 - cbug) + cb2[ 3:0] * cbug) >> 4;
+// wire [3:0] cl2r = (cb3[11:8] * (4'b1111 - cbur) + cb2[11:8] * cbur) >> 4;
+// wire [3:0] cl2g = (cb3[ 7:4] * (4'b1111 - cbur) + cb2[ 7:4] * cbur) >> 4;
+// wire [3:0] cl2b = (cb3[ 3:0] * (4'b1111 - cbur) + cb2[ 3:0] * cbur) >> 4;
+// wire [11:0] cl1 = {cl1r, cl1g, cl1b};
+// wire [11:0] cl2 = {cl2r, cl2g, cl2b};
+// wire [11:0] cpure = cl1            & {12{cbur >= cbug && cbub == 0}}
+//                   | cl2            & {12{cbug >  cbur && cbub == 0}}
+//                   | cb4            & {12{cbug == cbub && cbug >  0}}
+//                   | cb6            & {12{cbur == cbub && cbur >  0}}
+//                   | cb5            & {12{cbur == 0 && cbug == 0 && cbub > 0}}
+//                   | 12'hFFF        & {12{cbur == cbug && cbur == cbub}};
+// wire [ 3:0] black = (4'hF - cbur)   & {4{cbur >= cbug && cbub == 0}}
+//                   | (4'hF - cbug)   & {4{cbug >  cbur && cbub == 0}}
+//                   | (4'hF - cbug)   & {4{cbug == cbub && cbug >  0}}
+//                   | (4'hF - cbur)   & {4{cbur == cbub && cbur >  0}}
+//                   | (4'hF - cbub)   & {4{cbur == 0 && cbug == 0 && cbub > 0}}
+//                   | (4'hF       )   & {4{cbur == cbug && cbur == cbub}};
+// wire [ 3:0] white = (4'b0)          & {4{cbur >= cbug && cbub == 0}}
+//                   | (4'b0)          & {4{cbug >  cbur && cbub == 0}}
+//                   | (cbur)          & {4{cbug == cbub && cbug >  0}}
+//                   | (cbug)          & {4{cbur == cbub && cbur >  0}}
+//                   | (4'b0)          & {4{cbur == 0 && cbug == 0 && cbub > 0}}
+//                   | (cbur)          & {4{cbur == cbug && cbur == cbub}};
+// wire [11:0] blend_r = (4'hF - black) * (4'hF - white) * cpure[11:8] + (4'hF - black) * white * bird_col_white[11:8] + black * (4'hF - white) * bird_col_black[11:8];
+// wire [11:0] blend_g = (4'hF - black) * (4'hF - white) * cpure[ 7:4] + (4'hF - black) * white * bird_col_white[ 7:4] + black * (4'hF - white) * bird_col_black[ 7:4];
+// wire [11:0] blend_b = (4'hF - black) * (4'hF - white) * cpure[ 3:0] + (4'hF - black) * white * bird_col_white[ 3:0] + black * (4'hF - white) * bird_col_black[ 3:0];
+// wire [11:0] rgb_bird = {blend_r[11:8], blend_g[11:8], blend_b[11:8]};
+wire [11:0] rgb_bird = col_bird[15:4];
+wire [3:0] alpha_bird = bird_mask ? col_bird[3:0] : 4'b0;
 
 // Draw UI
 localparam text_center_x = 144, text_center_y = 160;
@@ -154,9 +257,18 @@ localparam tuto_center_x = 144, tuto_center_y = 256;
 localparam tuto_w = 57, tuto_h = 49;
 localparam gameover_w = 96, gameover_h = 21;
 localparam ready_w = 92, ready_h = 25;
-localparam tuto_x0 = tuto_center_x - tuto_w, tuto_x1 = tuto_center_x + tuto_w - 1, tuto_y0 = tuto_center_y - tuto_h, tuto_y1 = tuto_center_y + tuto_h - 1;
-localparam gameover_x0 = text_center_x - gameover_w, gameover_x1 = text_center_x + gameover_w - 1, gameover_y0 = text_center_y - gameover_h, gameover_y1 = text_center_y + gameover_h - 1;
-localparam ready_x0 = text_center_x - ready_w, ready_x1 = text_center_x + ready_w - 1, ready_y0 = text_center_y - ready_h, ready_y1 = text_center_y + ready_h - 1;
+localparam tuto_x0 = tuto_center_x - tuto_w, 
+           tuto_x1 = tuto_center_x + tuto_w - 1, 
+           tuto_y0 = tuto_center_y - tuto_h, 
+           tuto_y1 = tuto_center_y + tuto_h - 1;
+localparam gameover_x0 = text_center_x - gameover_w, 
+           gameover_x1 = text_center_x + gameover_w, 
+           gameover_y0 = text_center_y - gameover_h, 
+           gameover_y1 = text_center_y + gameover_h - 1;
+localparam ready_x0 = text_center_x - ready_w, 
+           ready_x1 = text_center_x + ready_w, 
+           ready_y0 = text_center_y - ready_h, 
+           ready_y1 = text_center_y + ready_h - 1;
 wire tuto_mask =     (game_status == 2'b01) & (($signed(screen_x) >= tuto_x0) &&     ($signed(screen_x) <= tuto_x1) &&     ($signed(screen_y) >= tuto_y0) &&     ($signed(screen_y) <= tuto_y1));
 wire ready_mask =    (game_status == 2'b01) & (($signed(screen_x) >= ready_x0) &&    ($signed(screen_x) <= ready_x1) &&    ($signed(screen_y) >= ready_y0) &&    ($signed(screen_y) <= ready_y1));
 wire gameover_mask = (game_status == 2'b11) & (($signed(screen_x) >= gameover_x0) && ($signed(screen_x) <= gameover_x1) && ($signed(screen_y) >= gameover_y0) && ($signed(screen_y) <= gameover_y1));
@@ -233,20 +345,19 @@ BROM_Numbers_16x3k brom_score (
 wire [11:0] rgb_layer0 = 
   (~screen_mask) ? col_outside :
   (score_mask) ? col_score[15:4] : 
-  (bird_mask && col_bird[3]) ? col_bird[15:4] :
   (land_mask) ? col_land :
   (tube_mask) ? col_tube :
   col_bg;
-wire [11:0] rgb_layer1 = rgb_ui;
-wire [3:0] a_layer1 = alpha_ui;
-wire [11:0] rgb_layer2 = 12'h000;
-wire [3:0] a_layer2 = 4'b0000;
+wire [11:0] rgb_layer1 = rgb_bird;
+wire [4:0] a_layer1 = ({1'b0, alpha_bird} + |alpha_bird) & {5{screen_mask}};
+wire [11:0] rgb_layer2 = rgb_ui;
+wire [4:0] a_layer2 = {1'b0, alpha_ui} + |alpha_ui;
 
 wire [7:0] r_blend_1 = rgb_layer0[11:8] * (8'b00010000 - a_layer1) + rgb_layer1[11:8] * a_layer1;
-wire [7:0] g_blend_1 = rgb_layer0[7:4] * (8'b00010000 - a_layer1) + rgb_layer1[7:4] * a_layer1;
-wire [7:0] b_blend_1 = rgb_layer0[3:0] * (8'b00010000 - a_layer1) + rgb_layer1[3:0] * a_layer1;
-wire [7:0] r_blend_2 = r_blend_1[7:4] * (8'b00010000 - a_layer2) + rgb_layer2[11:8] * a_layer2;
-wire [7:0] g_blend_2 = g_blend_1[7:4] * (8'b00010000 - a_layer2) + rgb_layer2[7:4] * a_layer2;
-wire [7:0] b_blend_2 = b_blend_1[7:4] * (8'b00010000 - a_layer2) + rgb_layer2[3:0] * a_layer2;
+wire [7:0] g_blend_1 = rgb_layer0[7:4]  * (8'b00010000 - a_layer1) + rgb_layer1[7:4]  * a_layer1;
+wire [7:0] b_blend_1 = rgb_layer0[3:0]  * (8'b00010000 - a_layer1) + rgb_layer1[3:0]  * a_layer1;
+wire [7:0] r_blend_2 = r_blend_1[7:4]   * (8'b00010000 - a_layer2) + rgb_layer2[11:8] * a_layer2;
+wire [7:0] g_blend_2 = g_blend_1[7:4]   * (8'b00010000 - a_layer2) + rgb_layer2[7:4]  * a_layer2;
+wire [7:0] b_blend_2 = b_blend_1[7:4]   * (8'b00010000 - a_layer2) + rgb_layer2[3:0]  * a_layer2;
 assign rgb = {r_blend_2[7:4], g_blend_2[7:4], b_blend_2[7:4]};
 endmodule

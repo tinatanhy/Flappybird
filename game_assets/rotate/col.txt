@@ -1,0 +1,71 @@
+0
+e0802c
+f8b733
+fad78c
+fad78c
+fc3800
+d7e6cc
+1
+40a4d2
+4bc1f8
+54d1ff
+fcd884
+e46018
+d7e6cc
+2
+d32f00
+fc3800
+fc730f
+d7e6cc
+f8b733
+d7e6cc
+
+533846
+
+0
+e82
+fb3
+fd8
+fd8
+f30
+dec
+1
+4ad
+4cf
+5df
+fd8
+e61
+dec
+2
+d20
+f30
+f70
+dec
+fb3
+dec
+
+534
+
+
+
+cl1 = lerp(cb1, cb2, cbug)
+cl2 = lerp(cb3, cb2, cbur)
+0   r>=g    g>=0   b=0      纯色     cl1
+                            混黑比   1-cbur
+                            混白比   0
+1   r>=0    g>=r   b=0      纯色     cl2
+                            混黑比   1-cbug
+                            混白比   0
+2   g=b>0                   纯色     cb4
+                            混黑比   1-cbug
+                            混白比   cbur
+3   r=b>0                   纯色     cb6
+                            混黑比   1-cbur
+                            混白比   cbug
+4   r=g=0, b>0              纯色     cb5
+                            混黑比   1-cbub
+                            混白比   0
+5   r=g=b                   纯色     1
+                            混黑比   1
+                            混白比   cbur
+pa<1,pi=0->混黑

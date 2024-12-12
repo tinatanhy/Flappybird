@@ -12,7 +12,7 @@ parameter TUBE_HITBOX_L = 2;
 parameter TUBE_HITBOX_R = 50;
 assign passed = bird_x >= tube_pos + TUBE_HITBOX_R;
 assign collide = 
-    ($signed(p1_bird_y) <= $signed(12)) 
+    ($signed(p1_bird_y) <= $signed(14)) 
     || (   ($signed(bird_x) <= $signed(tube_pos + TUBE_HITBOX_R + 12))
         && ($signed(bird_x) >= $signed(tube_pos + TUBE_HITBOX_L - 12))
         && ( ($signed(p1_bird_y) <= $signed(tube_height + 12)

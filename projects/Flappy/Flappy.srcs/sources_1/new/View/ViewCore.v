@@ -170,6 +170,9 @@ PixelRenderer pixelrenderer(
     .rgb(rdata)
 );
 assign view_debug_led = 32'h0;
-assign view_debug_seg[31:16] = pixel_x;
-assign view_debug_seg[15:0] = pixel_y;
+assign view_debug_seg[31:16] = 0;
+assign view_debug_seg[15:12] = bird_rotation / 1000 % 10;
+assign view_debug_seg[11:8] = bird_rotation / 100 % 10;
+assign view_debug_seg[7:4] = bird_rotation / 10 % 10;
+assign view_debug_seg[3:0] = bird_rotation % 10;
 endmodule
