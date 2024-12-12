@@ -19,10 +19,12 @@ wire [15:0]     view_debug_led;
 wire [31:0]     calc_debug_seg;
 wire [31:0]     view_debug_seg;
 wire [31:0]            timer;
+wire [31:0]    gameover_timestamp;
 wire [15:0] world_seed_input;
 wire [15:0]       world_seed;
 wire [1:0]       game_status;
 wire [15:0]            score;
+wire [11:0]    score_decimal;
 wire [31:0]        tube_pos0;
 wire [15:0]     tube_height0;
 wire [7:0]     tube_spacing0;
@@ -43,6 +45,9 @@ wire [2:0]          p1_input;
 wire [15:0]        bg_xshift;
 wire [1:0]    bird_animation;
 wire [7:0]     bird_rotation;
+wire [7:0] shake_x;
+wire [7:0] shake_y;
+wire upd;
 
 // Retry Module
 wire retry_pressed, retry_pressed_posedge;
@@ -66,7 +71,6 @@ PS retry_status_ps(
 wire retry_upd = retry_pressed_posedge || retry_status_posedge;
 // End Retry Module
 
-wire upd;
 FrameClock frameclk(
     .clk        (clk),
     .rstn       (rstn),
@@ -97,10 +101,12 @@ CalcCore#(
     .calc_debug_seg          (calc_debug_seg),
 
     .timer_output            (timer),
+    .gameover_timestamp_output (gameover_timestamp),
     .world_seed_input        (world_seed_input),
     .world_seed_output       (world_seed),
     .game_status_output      (game_status),
     .score_output            (score),
+    .score_decimal_output    (score_decimal),
     .tube_pos0_output        (tube_pos0),
     .tube_height0_output     (tube_height0),
     .tube_spacing0_output    (tube_spacing0),
@@ -120,7 +126,9 @@ CalcCore#(
     .p1_input_output         (p1_input),
     .bg_xshift_output        (bg_xshift),
     .bird_animation_output   (bird_animation),
-    .bird_rotation_output    (bird_rotation)
+    .bird_rotation_output    (bird_rotation),
+    .shake_x_output (shake_x),
+    .shake_y_output (shake_y)
 );
 
 ViewCore#(
@@ -133,9 +141,11 @@ ViewCore#(
     .view_debug_led      (view_debug_led),
     .view_debug_seg      (view_debug_seg),
     .timer_in            (timer),
+    .gameover_timestamp_in (gameover_timestamp),
     .world_seed_in       (world_seed),
     .game_status_in      (game_status),
     .score_in            (score),
+    .score_decimal_in    (score_decimal),
     .tube_pos0_in        (tube_pos0),
     .tube_height0_in     (tube_height0),
     .tube_spacing0_in    (tube_spacing0),
@@ -155,6 +165,8 @@ ViewCore#(
     .bg_xshift_in        (bg_xshift),
     .bird_animation_in   (bird_animation),
     .bird_rotation_in    (bird_rotation),
+    .shake_x_in (shake_x),
+    .shake_y_in (shake_y),
 
     .hs               (VGA_HS),
     .vs               (VGA_VS),
@@ -163,18 +175,88 @@ ViewCore#(
 
 reg [15:0] LEDData;
 reg [31:0] SegData;
+reg [55:0] SegData2;
 reg [7:0] SegMask;
+reg SegMode;
 initial begin
     LEDData = 16'h0000;
     SegData = 32'h00000000;
+    SegData2 = 56'b0;
     SegMask = 8'b00000000;
 end
 
 always @(*) begin
     LEDData = 16'h0000;
     SegData = 32'h00000000;
+    SegData2 = 56'b0;
     SegMask = 8'b00000000;
+    SegMode = 0;
     case(SW)
+    16'b0000_0000_0000_0000: begin
+        case(game_status)
+        2'b01: begin
+            SegData2 = 56'b1111111_0001110_1000111_0001000_0001100_0001100_0010001_1111111;
+            SegMode = 1;
+            SegMask = {8{$unsigned(timer[5:0]) >= $unsigned(32)}} & 8'b0111_1110;
+            LEDData = {16{$unsigned(timer[5:0]) >= $unsigned(32)}};
+        end
+        2'b10: begin
+            SegData[27:24] = score_decimal[11:8];
+            SegData[23:20] = score_decimal[7:4];
+            SegData[19:16] = score_decimal[3:0];
+            SegMask = { 1'b0, 
+                        (|score_decimal[11:8]),
+                        (|score_decimal[11:8]) | (|score_decimal[7:4]),
+                        1'b1,
+                        4'b0 };
+            case(timer[6:2])
+            5'b00000: LEDData = 16'b1000_0000_0000_0000;
+            5'b00001: LEDData = 16'b1100_0000_0000_0000;
+            5'b00010: LEDData = 16'b1110_0000_0000_0000;
+            5'b00011: LEDData = 16'b1111_0000_0000_0000;
+            5'b00100: LEDData = 16'b1111_1000_0000_0000;
+            5'b00101: LEDData = 16'b1111_1100_0000_0000;
+            5'b00110: LEDData = 16'b1111_1110_0000_0000;
+            5'b00111: LEDData = 16'b1111_1111_0000_0000;
+            5'b01000: LEDData = 16'b1111_1111_1000_0000;
+            5'b01001: LEDData = 16'b1111_1111_1100_0000;
+            5'b01010: LEDData = 16'b1111_1111_1110_0000;
+            5'b01011: LEDData = 16'b1111_1111_1111_0000;
+            5'b01100: LEDData = 16'b1111_1111_1111_1000;
+            5'b01101: LEDData = 16'b1111_1111_1111_1100;
+            5'b01110: LEDData = 16'b1111_1111_1111_1110;
+            5'b01111: LEDData = 16'b1111_1111_1111_1111;
+            5'b10000: LEDData = 16'b0111_1111_1111_1111;
+            5'b10001: LEDData = 16'b0011_1111_1111_1111;
+            5'b10010: LEDData = 16'b0001_1111_1111_1111;
+            5'b10011: LEDData = 16'b0000_1111_1111_1111;
+            5'b10100: LEDData = 16'b0000_0111_1111_1111;
+            5'b10101: LEDData = 16'b0000_0011_1111_1111;
+            5'b10110: LEDData = 16'b0000_0001_1111_1111;
+            5'b10111: LEDData = 16'b0000_0000_1111_1111;
+            5'b11000: LEDData = 16'b0000_0000_0111_1111;
+            5'b11001: LEDData = 16'b0000_0000_0011_1111;
+            5'b11010: LEDData = 16'b0000_0000_0001_1111;
+            5'b11011: LEDData = 16'b0000_0000_0000_1111;
+            5'b11100: LEDData = 16'b0000_0000_0000_0111;
+            5'b11101: LEDData = 16'b0000_0000_0000_0011;
+            5'b11110: LEDData = 16'b0000_0000_0000_0001;
+            5'b11111: LEDData = 16'b0000_0000_0000_0000;
+            endcase
+        end
+        2'b11: begin
+            SegData[27:24] = score_decimal[11:8];
+            SegData[23:20] = score_decimal[7:4];
+            SegData[19:16] = score_decimal[3:0];
+            SegMask = { 1'b0, 
+                        (|score_decimal[11:8]) & (|score_decimal[7:4]) & (|score_decimal[3:0]),
+                        (|score_decimal[7:4]) & (|score_decimal[3:0]),
+                        1'b1,
+                        4'b0 };
+            LEDData = {16{$unsigned(timer[5:0]) < $unsigned(32)}};
+        end
+        endcase
+    end
     16'b0000_0000_0000_0001: begin
         // CalcCore Data
         LEDData[0]    = calc_status == 0;
@@ -187,15 +269,16 @@ always @(*) begin
         LEDData[7]    = calc_status == 7;
         LEDData[8]    = $unsigned(timer[6:0]) < $unsigned(64);
         LEDData[11:9] = p1_input;
-        LEDData[13:12] = 2'b0;
+        LEDData[12] = retry_pressed;
+        LEDData[13] = 1'b0;
         LEDData[15:14] = game_status;
         SegData[31:28] = (p1_bird_y[31:16] / 1000) % 10;
         SegData[27:24] = (p1_bird_y[31:16] / 100) % 10;
         SegData[23:20] = (p1_bird_y[31:16] / 10) % 10;
         SegData[19:16] = (p1_bird_y[31:16]) % 10;
-        SegData[15:12] = (score / 1000) % 10;
-        SegData[11: 8] = (score / 100) % 10;
-        SegData[ 7: 4] = (score / 10) % 10;
+        SegData[15:12] = score_decimal[11:8];
+        SegData[11: 8] = score_decimal[7:4];
+        SegData[ 7: 4] = score_decimal[3:0];
         SegData[ 3: 0] = (score) % 10;
         SegMask = 8'b1111_1111;
     end
@@ -261,13 +344,24 @@ always @(*) begin
 end
 
 assign LED = LEDData;
-
+wire [6:0] seg_data0, seg_data1;
+wire [7:0] seg_an0, seg_an1;
 SegWithMask SegWithMaskInst(  
     .clk(CLK100MHZ),  
     .rst(~rstn),  
     .output_data(SegData),    
     .output_valid(SegMask),  
-    .seg_data(seg_data),  
-    .seg_an(AN)  
+    .seg_data(seg_data0),  
+    .seg_an(seg_an0)  
 );  
+SegController2 SegController2Inst(  
+    .clk(CLK100MHZ),  
+    .rst(~rstn),  
+    .output_data(SegData2),    
+    .output_valid(SegMask),  
+    .seg_data(seg_data1),  
+    .seg_an(seg_an1)  
+);  
+assign seg_data = SegMode ? seg_data1 : seg_data0;
+assign AN = SegMode ? seg_an1 : seg_an0;
 endmodule

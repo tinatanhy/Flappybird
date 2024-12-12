@@ -1,6 +1,6 @@
 from PIL import Image
 
-dep = 1
+dep = 16 
 wid = 16
 file = open(f"./game_assets/coe/Tube_{dep}kx{wid}.coe","w")
 file.write(f";{dep}k*{wid}\nmemory_initialization_radix=16;\nmemory_initialization_vector=\n")

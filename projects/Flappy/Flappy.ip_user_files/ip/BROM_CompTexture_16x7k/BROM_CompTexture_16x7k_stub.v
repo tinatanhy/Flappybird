@@ -4,8 +4,8 @@
 // Tool Version: Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
 // Date        : Thu Dec  5 21:51:35 2024
 // Host        : rubatoPC running 64-bit major release  (build 9200)
-// Command     : write_verilog -force -mode synth_stub
-//               d:/Github/FPGAFlappy/projects/Flappy/Flappy.gen/sources_1/ip/BROM_CompTexture_16x7k/BROM_CompTexture_16x7k_stub.v
+// Command     : write_verilog -force -mode synth_stub -rename_top BROM_CompTexture_16x7k -prefix
+//               BROM_CompTexture_16x7k_ BROM_CompTexture_16x7k_stub.v
 // Design      : BROM_CompTexture_16x7k
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7a100tcsg324-1

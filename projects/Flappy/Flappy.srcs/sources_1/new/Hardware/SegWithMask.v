@@ -17,7 +17,7 @@ module SegWithMask(
             counter <= 0;  
             seg_id <= 0;  
         end else begin  
-            if (counter >= 249999) begin   
+            if (counter >= 24999) begin   
                 counter <= 0;  
                 seg_id <= seg_id + 1;   
                 if (seg_id >= 3'b111) begin // 0-7的循环  

@@ -36,7 +36,7 @@ end
 
 always @(*) begin
     case(status)
-    2'b11: begin
+    2'b01: begin
         hash = hash_buffer3;
     end
     endcase

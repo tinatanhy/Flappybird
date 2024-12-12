@@ -3,7 +3,8 @@ module BirdUpdate#(
     parameter BG_XRANGE = 12,
     parameter BIRD_INITAIL_Y = 176,
     parameter BIRD_MINIMUM_Y = 12,
-    parameter BIRD_MAXIMUM_Y = 412
+    parameter BIRD_MAXIMUM_Y = 412,
+    parameter BIRD_MAX_VELOCITY = 32'h00058000
 )(
     input clk,
     input rstn,
@@ -25,6 +26,8 @@ module BirdUpdate#(
 // 也可以分出多个子模块进行实现。
 assign finish = 1'b1;
 
+reg [31:0] p1_bird_velparam;
+reg [31:0] p1_bird_velparam_delayed;
 reg [4:0] bird_anim_cnt;
 
 assign bird_animation = bird_anim_cnt[4:3];
@@ -43,7 +46,10 @@ always @(posedge clk) begin
         p1_bird_velocity <= 32'b0;
         bg_xshift <= 16'b0;
         bird_start_x <= 65535;
+        p1_bird_velparam_delayed <= 32'b0;
+        p1_bird_velparam <= 32'b0;
     end else begin
+        p1_bird_velparam_delayed <= (p1_bird_velparam_delayed * 120 + (p1_bird_velparam << 3)) >> 7;
         if(upd) begin 
             case(game_status)
             2'b00: begin
@@ -54,6 +60,7 @@ always @(posedge clk) begin
                 p1_bird_velocity <= 32'b0;
                 bg_xshift <= 16'b0;
                 bird_anim_cnt <= 0;
+                p1_bird_velparam <= 32'b0;
             end
             2'b01: begin
                 // 开始界面。鸟上下移动。
@@ -85,9 +92,10 @@ always @(posedge clk) begin
                         p1_bird_y[31:16] <= BIRD_MINIMUM_Y;
                         p1_bird_y[15:0] <= 0;
                     end
-                    p1_bird_velocity <= 32'h00058000;
+                    p1_bird_velocity <= BIRD_MAX_VELOCITY;
                 end
                 else p1_bird_velocity <= 0;/// 因为我的设计，在开始界面按下按键时，也要给鸟向上的速度。
+                p1_bird_velparam <= 32'b0;
             end 
             2'b10: begin
                 if(p1_input[0])begin
@@ -95,7 +103,7 @@ always @(posedge clk) begin
                         p1_bird_y[31:16] <= BIRD_MINIMUM_Y;
                         p1_bird_y[15:0] <= 0;
                     end
-                    p1_bird_velocity <= 32'h00058000;
+                    p1_bird_velocity <= BIRD_MAX_VELOCITY;
                 end else begin
                     if($signed(p1_bird_y[31:16] + p1_bird_velocity[31:16]) < $signed(BIRD_MINIMUM_Y))begin
                         p1_bird_y[31:16] <= BIRD_MINIMUM_Y;
@@ -110,6 +118,7 @@ always @(posedge clk) begin
                         p1_bird_velocity <= p1_bird_velocity - 32'h00004400;
                     end
                 end
+                p1_bird_velparam <= p1_bird_velocity * 48;
                 
                 // TODO
                 // 游戏状态。
@@ -123,6 +132,19 @@ always @(posedge clk) begin
                 // GAME OVER 状态。
                 // 暂时什么也不做。(Checkpoint 2)
                 // 可能需要鸟下坠。(Checkpoint 3)
+                if($signed(p1_bird_y[31:16] + p1_bird_velocity[31:16]) <= $signed(BIRD_MINIMUM_Y)) begin
+                    p1_bird_y[31:16] <= BIRD_MINIMUM_Y;
+                    p1_bird_y[15:0] <= 0;
+                    p1_bird_velocity <= 0;
+                end else begin
+                    if($signed(p1_bird_velocity) > 0) begin
+                        p1_bird_velocity <= 0;
+                        p1_bird_y <= p1_bird_y;
+                    end else begin
+                        p1_bird_velocity <= p1_bird_velocity - 32'h00005000;
+                        p1_bird_y <= p1_bird_y + p1_bird_velocity;
+                    end
+                end
                 bird_x <= bird_x;                   // 世界坐标不再移动
                 bird_anim_cnt <= bird_anim_cnt + 1; // 播放动画
             end

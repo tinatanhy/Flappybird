@@ -14,7 +14,7 @@ module DDP#(
     output reg [11:0]   rgb,
     output reg [DW-1:0] raddr
 );
-parameter SCALE = $clog2(800 / H_LEN);
+localparam SCALE = $clog2(800 / H_LEN);
 reg [SCALE-1:0] sx;       //放大四倍
 reg [SCALE-1:0] sy;
 reg [SCALE-1:0] nsx;

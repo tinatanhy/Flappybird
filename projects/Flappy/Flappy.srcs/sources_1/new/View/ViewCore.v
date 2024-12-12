@@ -9,9 +9,11 @@ module ViewCore#(
     input rstn,
     input upd,
     input [31:0]            timer_in,
+    input [31:0] gameover_timestamp_in,
     input [15:0]       world_seed_in,
     input [1:0]       game_status_in,
     input [15:0]            score_in,
+    input [11:0]    score_decimal_in,
     input [31:0]        tube_pos0_in,
     input [15:0]     tube_height0_in,
     input [7:0]     tube_spacing0_in,
@@ -31,6 +33,8 @@ module ViewCore#(
     input [15:0]        bg_xshift_in,
     input [1:0]    bird_animation_in,
     input [7:0]     bird_rotation_in,
+    input [7:0]      shake_x_in,
+    input [7:0]      shake_y_in,
     output [15:0] view_debug_led,
     output [31:0] view_debug_seg,
     output hs, vs,
@@ -39,9 +43,11 @@ module ViewCore#(
 
 // Buffering
 reg [31:0]            timer;
+reg [31:0] gameover_timestamp;
 reg [15:0]       world_seed;
 reg [1:0]       game_status;
 reg [15:0]            score;
+reg [11:0]    score_decimal;
 reg [31:0]        tube_pos0;
 reg [15:0]     tube_height0;
 reg [7:0]     tube_spacing0;
@@ -61,18 +67,21 @@ reg [31:0] p1_bird_velocity;
 reg [15:0]        bg_xshift;
 reg [1:0]    bird_animation;
 reg [7:0]     bird_rotation;
+reg [7:0]      shake_x;
+reg [7:0]      shake_y;
 
 wire [10:0] pixel_x, pixel_y;
-wire [DW-1:0] raddr;
 wire [11:0] rdata;
 wire hen, ven, pclk, locked;
 
 always @(*) begin
     if(pixel_x == 0 && pixel_y == 0) begin
         timer = timer_in;
+        gameover_timestamp = gameover_timestamp_in;
         world_seed = world_seed_in;
         game_status = game_status_in;
         score = score_in;
+        score_decimal = score_decimal_in;
         tube_pos0 = tube_pos0_in;
         tube_height0 = tube_height0_in;
         tube_spacing0 = tube_spacing0_in;
@@ -92,6 +101,8 @@ always @(*) begin
         bg_xshift = bg_xshift_in;
         bird_animation = bird_animation_in;
         bird_rotation = bird_rotation_in;
+        shake_x = shake_x_in;
+        shake_y = shake_y_in;
     end
 end
 
@@ -123,26 +134,16 @@ DDPGame#(
     .pixel_x(pixel_x),
     .pixel_y(pixel_y)
 );
-AnimFrameCounter#(
-    .DW(DW),
-    .FRAME_SIZE(7500),
-    .FRAME_N(40)
-) framecounter (
-    .pclk(pclk), 
-    .rstn(rstn), 
-    .ven(ven),
-    .imgaddr((pixel_y >> 3) * 100 + (pixel_x >> 3)),
-    .raddr(raddr)
-);
 PixelRenderer pixelrenderer(
     .clk(clk),
     .pclk(pclk),
     .rstn(rstn),
-    .pixel_x(pixel_x),
-    .pixel_y(pixel_y),
+    .pixel_x_in(pixel_x),
+    .pixel_y_in(pixel_y),
     .world_seed       (world_seed),
     .game_status      (game_status),
     .score            (score),
+    .score_decimal    (score_decimal),
     .tube_pos0        (tube_pos0),
     .tube_height0     (tube_height0),
     .tube_spacing0    (tube_spacing0),
@@ -162,7 +163,10 @@ PixelRenderer pixelrenderer(
     .bg_xshift        (bg_xshift),
     .bird_animation   (bird_animation),
     .bird_rotation    (bird_rotation),
+    .shake_x          (shake_x),
+    .shake_y          (shake_y),
     .timer(timer),
+    .gameover_timestamp(gameover_timestamp),
     .rgb(rdata)
 );
 assign view_debug_led = 32'h0;

@@ -14,9 +14,11 @@ module CalcCore#(
     output [31:0]        calc_debug_seg,
     output reg finish,
     output    [31:0]             timer_output,
+    output reg [31:0]       gameover_timestamp_output,
     output reg [1:0]       game_status_output,
     output reg [15:0]       world_seed_output,
     output reg [15:0]            score_output,
+    output reg [11:0]    score_decimal_output,
     output reg [31:0]        tube_pos0_output,
     output reg [15:0]     tube_height0_output,
     output reg [7:0]     tube_spacing0_output,
@@ -36,7 +38,9 @@ module CalcCore#(
     output reg [15:0]        bg_xshift_output,
     output reg [1:0]    bird_animation_output,
     output reg [7:0]     bird_rotation_output,
-    output reg [2:0]          p1_input_output
+    output reg [2:0]          p1_input_output,
+    output reg [7:0]       shake_x_output,
+    output reg [7:0]       shake_y_output
 );
 // CalcCore: 各个子模块的调度模块
 reg     input_gdata_upd,
@@ -149,9 +153,13 @@ wire [31:0] tube_pos      [N_TUBE-1:0];
 wire [15:0] tube_height   [N_TUBE-1:0];
 wire [7:0]  tube_spacing  [N_TUBE-1:0];
 wire [15:0] score;
+wire [11:0] score_decimal;
 wire [1:0] bird_animation;
 wire [7:0] bird_rotation;
 wire [15:0] bg_xshift;
+wire [7:0] shake_x;
+wire [7:0] shake_y;
+wire [31:0] gameover_timestamp;
 KeyInput input_p1(
     .upd        (input_gdata_upd),
     .btn        (btn),
@@ -164,6 +172,11 @@ GlobalDataUpdate globaldata(
     .clk        (clk),
     .rstn       (rstn),
     .upd        (input_gdata_upd),
+    .game_status(game_status),
+    .timer      (timer),
+    .gameover_timestamp(gameover_timestamp),
+    .shake_x    (shake_x),
+    .shake_y    (shake_y),
     .finish     (globaldata_finish)
 );
 BirdUpdate#(
@@ -212,6 +225,8 @@ StatusUpdate status_update(
     .rstn         (rstn),
     .upd          (status_upd),
     .retry        (retry),
+    .timer        (timer),
+    .gameover_timestamp (gameover_timestamp),
     .p1_input     (p1_input),
     .bird_x       (bird_x),
     .p1_bird_y    (p1_bird_y[31:16]),
@@ -219,6 +234,7 @@ StatusUpdate status_update(
     .tube_height  (tube_height[IND_TUBE_INTERACT]),
     .tube_spacing (tube_spacing[IND_TUBE_INTERACT]),
     .score        (score),
+    .score_decimal(score_decimal),
     .game_status  (game_status),
     .finish       (status_update_finish)
 );
@@ -232,6 +248,7 @@ always @(posedge clk) begin
     if(!rstn || (submodule_status == 3'b111 && !lock)) begin
              game_status_output <=      game_status;
                    score_output <=            score;
+           score_decimal_output <=    score_decimal;
                tube_pos0_output <=      tube_pos[0];        
             tube_height0_output <=   tube_height[0];
            tube_spacing0_output <=  tube_spacing[0];
@@ -253,6 +270,9 @@ always @(posedge clk) begin
           bird_animation_output <=   bird_animation;
            bird_rotation_output <=    bird_rotation;
              world_seed_output  <=       world_seed;
+             shake_x_output     <=       shake_x;
+             shake_y_output     <=       shake_y;
+        gameover_timestamp_output <= gameover_timestamp;
         lock <= 1;
     end else if(submodule_status == 3'b000) begin
         lock <= 0;

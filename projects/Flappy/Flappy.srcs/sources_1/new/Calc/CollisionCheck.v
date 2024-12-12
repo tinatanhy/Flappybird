@@ -15,6 +15,6 @@ assign collide =
     ($signed(p1_bird_y) <= $signed(12)) 
     || (   ($signed(bird_x) <= $signed(tube_pos + TUBE_HITBOX_R + 12))
         && ($signed(bird_x) >= $signed(tube_pos + TUBE_HITBOX_L - 12))
-        && ( ($signed(p1_bird_y) <= $signed(tube_height)
-           || $signed(p1_bird_y) >= $signed(tube_height + tube_spacing))));
+        && ( ($signed(p1_bird_y) <= $signed(tube_height + 12)
+           || $signed(p1_bird_y) >= $signed(tube_height + tube_spacing - 12))));
 endmodule

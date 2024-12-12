@@ -39,7 +39,7 @@ Hash32to16 hash32to16_0(
     .clk(clk),
     .rstn(rstn),
     .start(upd),
-    .seed({score - 1, 3'b000, seed}),
+    .seed({score - 16'd1, 3'b000, seed}),
     .finish(finish0),
     .hash(hash0)
 );
@@ -55,7 +55,7 @@ Hash32to16 hash32to16_2(
     .clk(clk),
     .rstn(rstn),
     .start(upd),
-    .seed({score + 1, 3'b000, seed}),
+    .seed({score + 16'd1, 3'b000, seed}),
     .finish(finish2),
     .hash(hash2)
 );
@@ -63,7 +63,7 @@ Hash32to16 hash32to16_3(
     .clk(clk),
     .rstn(rstn),
     .start(upd),
-    .seed({score + 2, 3'b000, seed}),
+    .seed({score + 16'd2, 3'b000, seed}),
     .finish(finish3),
     .hash(hash3)
 );
