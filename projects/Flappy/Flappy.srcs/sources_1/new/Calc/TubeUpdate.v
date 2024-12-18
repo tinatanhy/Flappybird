@@ -67,11 +67,12 @@ Hash32to16 hash32to16_3(
     .finish(finish3),
     .hash(hash3)
 );
-assign tube_pos0_calc = bird_start_x + ((score == 0) ? -200 : 
-                                       (((score + 1) << 7) + ((score + 1) << 6)));
-assign tube_pos1_calc = bird_start_x + (((score + 2) << 7) + ((score + 2) << 6));
-assign tube_pos2_calc = bird_start_x + (((score + 3) << 7) + ((score + 3) << 6));
-assign tube_pos3_calc = bird_start_x + (((score + 4) << 7) + ((score + 4) << 6));
+wire [31:0] score_expand = {16'd0, score};
+wire [31:0] score_shift = (score_expand << 7) + (score_expand << 6);
+assign tube_pos0_calc = bird_start_x + 32'd192 + ((score == 0) ? -400 : score_shift);
+assign tube_pos1_calc = bird_start_x + 32'd384 + score_shift;
+assign tube_pos2_calc = bird_start_x + 32'd576 + score_shift;
+assign tube_pos3_calc = bird_start_x + 32'd768 + score_shift;
 assign tube_spacing0_calc = 120;
 assign tube_spacing1_calc = 120;
 assign tube_spacing2_calc = 120;

@@ -20,7 +20,6 @@ module SegController2(
 
 reg [31:0] counter;  
 reg [2:0]  seg_id; // 管 Id, 用于选择哪个数码管  
-reg [3:0]  seg_data1; // 存储当前要显示的4位数据  
 
 // 生成400Hz的信号  
 always @(posedge clk) begin  

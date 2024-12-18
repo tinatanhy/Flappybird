@@ -38,11 +38,11 @@
             seed <= 32'b0;       // 种子初始为 0  
         end else begin  
                 // 仅在`finish`为0时更新计数器和种子  
-                counter <= counter + 114513;  
-                seed <= counter;  // 将计数器当前值作为种子  
+                counter <= counter + 32'd998244353;  
+                seed <= { counter[15:0], counter[31:16]};  // 将计数器当前值作为种子  
                 finish <= 0;
                 // 当更新信号有效时，生成随机数  
-                simple_hash <= seed; 
+                simple_hash <= seed[15:0] ^ seed[31:16]; 
                 if (upd) begin  
                     // 简单哈希生成  
                     // 设置生成完成信号和生成的随机数  

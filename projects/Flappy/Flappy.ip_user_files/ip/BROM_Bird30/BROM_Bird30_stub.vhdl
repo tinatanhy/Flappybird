@@ -4,8 +4,8 @@
 -- Tool Version: Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
 -- Date        : Fri Dec 13 00:31:32 2024
 -- Host        : rubatoPC running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub
---               d:/Github/FPGAFlappy/projects/Flappy/Flappy.gen/sources_1/ip/BROM_Bird30/BROM_Bird30_stub.vhdl
+-- Command     : write_vhdl -force -mode synth_stub -rename_top BROM_Bird30 -prefix
+--               BROM_Bird30_ BROM_Bird30_stub.vhdl
 -- Design      : BROM_Bird30
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7a100tcsg324-1

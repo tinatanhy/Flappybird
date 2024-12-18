@@ -14,6 +14,7 @@ reg [7:0] counter;
 PS #(1) ps(
     .s      (~ven),
     .clk    (pclk),
+    .rstn(rstn),
     .p      (p)
 );
 

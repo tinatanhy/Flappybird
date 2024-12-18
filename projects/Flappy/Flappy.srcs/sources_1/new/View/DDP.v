@@ -31,6 +31,7 @@ wire p;
 PS #(1) ps(                             //取ven下降沿
     .s      (~(hen&ven)),
     .clk    (pclk),
+    .rstn(rstn),
     .p      (p)
 );
 

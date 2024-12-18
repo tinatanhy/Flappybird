@@ -4,8 +4,8 @@
 -- Tool Version: Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
 -- Date        : Thu Dec 12 21:52:49 2024
 -- Host        : rubatoPC running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub
---               d:/Github/FPGAFlappy/projects/Flappy/Flappy.gen/sources_1/ip/BROM_Tube_16x16k/BROM_Tube_16x16k_stub.vhdl
+-- Command     : write_vhdl -force -mode synth_stub -rename_top BROM_Tube_16x16k -prefix
+--               BROM_Tube_16x16k_ BROM_Tube_16x16k_stub.vhdl
 -- Design      : BROM_Tube_16x16k
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7a100tcsg324-1

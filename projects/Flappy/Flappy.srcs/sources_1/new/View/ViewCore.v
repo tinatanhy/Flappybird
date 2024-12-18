@@ -74,35 +74,35 @@ wire [10:0] pixel_x, pixel_y;
 wire [11:0] rdata;
 wire hen, ven, pclk, locked;
 
-always @(*) begin
-    if(pixel_x == 0 && pixel_y == 0) begin
-        timer = timer_in;
-        gameover_timestamp = gameover_timestamp_in;
-        world_seed = world_seed_in;
-        game_status = game_status_in;
-        score = score_in;
-        score_decimal = score_decimal_in;
-        tube_pos0 = tube_pos0_in;
-        tube_height0 = tube_height0_in;
-        tube_spacing0 = tube_spacing0_in;
-        tube_pos1 = tube_pos1_in;
-        tube_height1 = tube_height1_in;
-        tube_spacing1 = tube_spacing1_in;
-        tube_pos2 = tube_pos2_in;
-        tube_height2 = tube_height2_in;
-        tube_spacing2 = tube_spacing2_in;
-        tube_pos3 = tube_pos3_in;
-        tube_height3 = tube_height3_in;
-        tube_spacing3 = tube_spacing3_in;
-        bird_x = bird_x_in;
-        camera_x = camera_x_in;
-        p1_bird_y = p1_bird_y_in;
-        p1_bird_velocity = p1_bird_velocity_in;
-        bg_xshift = bg_xshift_in;
-        bird_animation = bird_animation_in;
-        bird_rotation = bird_rotation_in;
-        shake_x = shake_x_in;
-        shake_y = shake_y_in;
+always @(posedge pclk) begin
+    if(~rstn || (pixel_x == 0 && pixel_y == 0)) begin
+        timer <= timer_in;
+        gameover_timestamp <= gameover_timestamp_in;
+        world_seed <= world_seed_in;
+        game_status <= game_status_in;
+        score <= score_in;
+        score_decimal <= score_decimal_in;
+        tube_pos0 <= tube_pos0_in;
+        tube_height0 <= tube_height0_in;
+        tube_spacing0 <= tube_spacing0_in;
+        tube_pos1 <= tube_pos1_in;
+        tube_height1 <= tube_height1_in;
+        tube_spacing1 <= tube_spacing1_in;
+        tube_pos2 <= tube_pos2_in;
+        tube_height2 <= tube_height2_in;
+        tube_spacing2 <= tube_spacing2_in;
+        tube_pos3 <= tube_pos3_in;
+        tube_height3 <= tube_height3_in;
+        tube_spacing3 <= tube_spacing3_in;
+        bird_x <= bird_x_in;
+        camera_x <= camera_x_in;
+        p1_bird_y <= p1_bird_y_in;
+        p1_bird_velocity <= p1_bird_velocity_in;
+        bg_xshift <= bg_xshift_in;
+        bird_animation <= bird_animation_in;
+        bird_rotation <= bird_rotation_in;
+        shake_x <= shake_x_in;
+        shake_y <= shake_y_in;
     end
 end
 

@@ -13,6 +13,8 @@ wire clk = CLK100MHZ;
 wire rstn = CPU_RESETN;
 wire btn = BTNC;
 wire wdata_finish, calc_finish;
+
+reg god_mode;
 wire [2:0] calc_status;
 wire [15:0]     calc_debug_led;
 wire [15:0]     view_debug_led;
@@ -53,22 +55,39 @@ wire upd;
 wire retry_pressed, retry_pressed_posedge;
 wire retry_status, retry_status_posedge;
 assign retry_status = game_status == 2'b00;
+wire retry_protection = (game_status == 2'b11 
+                && $signed(timer) >= $signed(gameover_timestamp) 
+                && $signed(timer) <= $signed(gameover_timestamp + 72));
 Button button_retry(
     .clk(upd),
-    .btn(BTNU),
+    .rstn(rstn),
+    .btn(BTNU & ~retry_protection),
     .pressed(retry_pressed)
 );
 PS retry_btn_ps(
-    .clk(upd),
+    .clk(clk),
+    .rstn(rstn),
     .s(retry_pressed),
     .p(retry_pressed_posedge)
 );
 PS retry_status_ps(
-    .clk(upd),
+    .clk(clk),
+    .rstn(rstn),
     .s(retry_status),
     .p(retry_status_posedge)
 );
 wire retry_upd = retry_pressed_posedge || retry_status_posedge;
+always @(posedge clk) begin
+    if(~rstn) begin
+        god_mode <= 0;
+    end else begin
+        if(~god_mode) begin
+            god_mode <= SW[15];
+        end else if(retry_upd) begin
+            god_mode <= SW[15];
+        end
+    end
+end
 // End Retry Module
 
 FrameClock frameclk(
@@ -94,6 +113,8 @@ CalcCore#(
     .btn                     (btn),
     .upd                     (upd),
     .retry                   (retry_pressed),
+    .god_mode                (god_mode),
+    .debug_speed_boost       (SW[14]),
 
     .finish                  (calc_finish),
     .calc_status             (calc_status),
@@ -191,71 +212,82 @@ always @(*) begin
     SegData2 = 56'b0;
     SegMask = 8'b00000000;
     SegMode = 0;
-    case(SW)
-    16'b0000_0000_0000_0000: begin
-        case(game_status)
-        2'b01: begin
-            SegData2 = 56'b1111111_0001110_1000111_0001000_0001100_0001100_0010001_1111111;
-            SegMode = 1;
-            SegMask = {8{$unsigned(timer[5:0]) >= $unsigned(32)}} & 8'b0111_1110;
-            LEDData = {16{$unsigned(timer[5:0]) >= $unsigned(32)}};
-        end
-        2'b10: begin
-            SegData[27:24] = score_decimal[11:8];
-            SegData[23:20] = score_decimal[7:4];
-            SegData[19:16] = score_decimal[3:0];
-            SegMask = { 1'b0, 
-                        (|score_decimal[11:8]),
-                        (|score_decimal[11:8]) | (|score_decimal[7:4]),
-                        1'b1,
-                        4'b0 };
-            case(timer[6:2])
-            5'b00000: LEDData = 16'b1000_0000_0000_0000;
-            5'b00001: LEDData = 16'b1100_0000_0000_0000;
-            5'b00010: LEDData = 16'b1110_0000_0000_0000;
-            5'b00011: LEDData = 16'b1111_0000_0000_0000;
-            5'b00100: LEDData = 16'b1111_1000_0000_0000;
-            5'b00101: LEDData = 16'b1111_1100_0000_0000;
-            5'b00110: LEDData = 16'b1111_1110_0000_0000;
-            5'b00111: LEDData = 16'b1111_1111_0000_0000;
-            5'b01000: LEDData = 16'b1111_1111_1000_0000;
-            5'b01001: LEDData = 16'b1111_1111_1100_0000;
-            5'b01010: LEDData = 16'b1111_1111_1110_0000;
-            5'b01011: LEDData = 16'b1111_1111_1111_0000;
-            5'b01100: LEDData = 16'b1111_1111_1111_1000;
-            5'b01101: LEDData = 16'b1111_1111_1111_1100;
-            5'b01110: LEDData = 16'b1111_1111_1111_1110;
-            5'b01111: LEDData = 16'b1111_1111_1111_1111;
-            5'b10000: LEDData = 16'b0111_1111_1111_1111;
-            5'b10001: LEDData = 16'b0011_1111_1111_1111;
-            5'b10010: LEDData = 16'b0001_1111_1111_1111;
-            5'b10011: LEDData = 16'b0000_1111_1111_1111;
-            5'b10100: LEDData = 16'b0000_0111_1111_1111;
-            5'b10101: LEDData = 16'b0000_0011_1111_1111;
-            5'b10110: LEDData = 16'b0000_0001_1111_1111;
-            5'b10111: LEDData = 16'b0000_0000_1111_1111;
-            5'b11000: LEDData = 16'b0000_0000_0111_1111;
-            5'b11001: LEDData = 16'b0000_0000_0011_1111;
-            5'b11010: LEDData = 16'b0000_0000_0001_1111;
-            5'b11011: LEDData = 16'b0000_0000_0000_1111;
-            5'b11100: LEDData = 16'b0000_0000_0000_0111;
-            5'b11101: LEDData = 16'b0000_0000_0000_0011;
-            5'b11110: LEDData = 16'b0000_0000_0000_0001;
-            5'b11111: LEDData = 16'b0000_0000_0000_0000;
+    casez(SW)
+    16'b??00_0000_0000_0000: begin
+        if(~god_mode) begin
+            case(game_status)
+                2'b01: begin
+                    SegData2 = 56'b1111111_0001110_1000111_0001000_0001100_0001100_0010001_1111111;
+                    SegMode = 1;
+                    SegMask = {8{$unsigned(timer[5:0]) >= $unsigned(32)}} & 8'b0111_1110;
+                    LEDData = {16{$unsigned(timer[5:0]) >= $unsigned(32)}};
+                end
+                2'b10: begin
+                    SegData[27:24] = score_decimal[11:8];
+                    SegData[23:20] = score_decimal[7:4];
+                    SegData[19:16] = score_decimal[3:0];
+                    SegMask = { 1'b0, 
+                                (|score_decimal[11:8]),
+                                (|score_decimal[11:8]) | (|score_decimal[7:4]),
+                                1'b1,
+                                4'b0 };
+                    case(timer[6:2])
+                    5'b00000: LEDData = 16'b1000_0000_0000_0000;
+                    5'b00001: LEDData = 16'b1100_0000_0000_0000;
+                    5'b00010: LEDData = 16'b1110_0000_0000_0000;
+                    5'b00011: LEDData = 16'b1111_0000_0000_0000;
+                    5'b00100: LEDData = 16'b1111_1000_0000_0000;
+                    5'b00101: LEDData = 16'b1111_1100_0000_0000;
+                    5'b00110: LEDData = 16'b1111_1110_0000_0000;
+                    5'b00111: LEDData = 16'b1111_1111_0000_0000;
+                    5'b01000: LEDData = 16'b1111_1111_1000_0000;
+                    5'b01001: LEDData = 16'b1111_1111_1100_0000;
+                    5'b01010: LEDData = 16'b1111_1111_1110_0000;
+                    5'b01011: LEDData = 16'b1111_1111_1111_0000;
+                    5'b01100: LEDData = 16'b1111_1111_1111_1000;
+                    5'b01101: LEDData = 16'b1111_1111_1111_1100;
+                    5'b01110: LEDData = 16'b1111_1111_1111_1110;
+                    5'b01111: LEDData = 16'b1111_1111_1111_1111;
+                    5'b10000: LEDData = 16'b0111_1111_1111_1111;
+                    5'b10001: LEDData = 16'b0011_1111_1111_1111;
+                    5'b10010: LEDData = 16'b0001_1111_1111_1111;
+                    5'b10011: LEDData = 16'b0000_1111_1111_1111;
+                    5'b10100: LEDData = 16'b0000_0111_1111_1111;
+                    5'b10101: LEDData = 16'b0000_0011_1111_1111;
+                    5'b10110: LEDData = 16'b0000_0001_1111_1111;
+                    5'b10111: LEDData = 16'b0000_0000_1111_1111;
+                    5'b11000: LEDData = 16'b0000_0000_0111_1111;
+                    5'b11001: LEDData = 16'b0000_0000_0011_1111;
+                    5'b11010: LEDData = 16'b0000_0000_0001_1111;
+                    5'b11011: LEDData = 16'b0000_0000_0000_1111;
+                    5'b11100: LEDData = 16'b0000_0000_0000_0111;
+                    5'b11101: LEDData = 16'b0000_0000_0000_0011;
+                    5'b11110: LEDData = 16'b0000_0000_0000_0001;
+                    5'b11111: LEDData = 16'b0000_0000_0000_0000;
+                    endcase
+                end
+                2'b11: begin
+                    SegData[27:24] = score_decimal[11:8];
+                    SegData[23:20] = score_decimal[7:4];
+                    SegData[19:16] = score_decimal[3:0];
+                    SegMask = { 1'b0, 
+                                (|score_decimal[11:8]),
+                                (|score_decimal[11:8]) | (|score_decimal[7:4]),
+                                1'b1,
+                                4'b0 };
+                    if(SW[14]) begin
+                        LEDData = {16{$unsigned(timer[3:0]) < $unsigned(8)}};
+                    end else begin
+                        LEDData = {16{$unsigned(timer[5:0]) < $unsigned(32)}};
+                    end
+                end
             endcase
+        end else begin 
+            SegData2 = 56'b0010000_0100011_0100001_1111111_0000011_1111011_0101111_0100001;
+            SegMode = 1;
+            SegMask = {8{$unsigned(timer[5:0]) >= $unsigned(32)}} & 8'b1110_1111;
+            LEDData = {16{$unsigned(timer[4:0]) >= $unsigned(16)}};
         end
-        2'b11: begin
-            SegData[27:24] = score_decimal[11:8];
-            SegData[23:20] = score_decimal[7:4];
-            SegData[19:16] = score_decimal[3:0];
-            SegMask = { 1'b0, 
-                        (|score_decimal[11:8]) & (|score_decimal[7:4]) & (|score_decimal[3:0]),
-                        (|score_decimal[7:4]) & (|score_decimal[3:0]),
-                        1'b1,
-                        4'b0 };
-            LEDData = {16{$unsigned(timer[5:0]) < $unsigned(32)}};
-        end
-        endcase
     end
     16'b0000_0000_0000_0001: begin
         // CalcCore Data
@@ -316,7 +348,7 @@ always @(*) begin
         SegData[ 3: 0] = ((tube_pos1) / 10) % 10;
         SegMask = 8'b1111_1111;
     end
-    16'b0000_0000_0000_0011: begin
+    16'b0000_0000_0010_0000: begin
         LEDData[0]    = calc_status == 0;
         LEDData[1]    = calc_status == 1;
         LEDData[2]    = calc_status == 2;
@@ -339,12 +371,12 @@ always @(*) begin
         SegData[ 3: 0] = (p1_bird_velocity[31:16]) % 10;
         SegMask = 8'b1111_1111;
     end
-    16'b0000_0000_0000_0111: begin
+    16'b0000_0000_0100_0000: begin
         LEDData = calc_debug_led;
         SegData = calc_debug_seg;
         SegMask = 8'b1111_1111;
     end
-    16'b0000_0000_0000_1111: begin
+    16'b0000_0000_1000_0000: begin
         LEDData = view_debug_led;
         SegData = view_debug_seg;
         SegMask = 8'b1111_1111;

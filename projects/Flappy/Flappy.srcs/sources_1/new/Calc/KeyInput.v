@@ -1,6 +1,7 @@
 module KeyInput (  
     input upd, 
     input btn, 
+    input rstn,
     output pressed, check, released, finish
 ); 
 // 已完成
@@ -9,6 +10,7 @@ module KeyInput (
 Button button(
     .clk(upd),
     .btn(btn),
+    .rstn(rstn),
     .check(check),
     .pressed(pressed),
     .released(released)

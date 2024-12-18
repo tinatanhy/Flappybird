@@ -32,6 +32,7 @@ ClkWizPCLK clkwiz_pclk
 wire p;
 PS #(1) ps(
     .s      (in),
+    .rstn   (rstn),
     .clk    (pclk),
     .p      (p)
 );

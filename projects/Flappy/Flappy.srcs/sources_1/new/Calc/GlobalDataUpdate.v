@@ -21,7 +21,7 @@ Hash32to16 hash_instance(
 
 wire [31:0] gameover_delta_time = timer - gameover_timestamp;
 wire is_shake = game_status == 2'b11 && $signed(gameover_delta_time) >= 0 && $signed(gameover_delta_time) < 8;
-assign    shake_x = (hash[10:8] + hash[12:11] - 6) & {8{is_shake}};
-assign    shake_y = (hash[2:0]  + hash[4:3]   - 6) & {8{is_shake}};
+assign    shake_x = (hash[11:8] - 8) & {8{is_shake}};
+assign    shake_y = (hash[3:0]  - 8) & {8{is_shake}};
 
 endmodule

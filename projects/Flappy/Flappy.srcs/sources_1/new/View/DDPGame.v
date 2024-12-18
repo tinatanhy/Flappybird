@@ -16,6 +16,7 @@ wire p;
 PS #(1) ps(
     .s      (~(hen&ven)),
     .clk    (pclk),
+    .rstn(rstn),
     .p      (p)
 );
 

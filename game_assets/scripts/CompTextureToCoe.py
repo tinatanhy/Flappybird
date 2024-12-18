@@ -1,14 +1,14 @@
 from PIL import Image
 
-file = open("./game_assets/coe/CompTexture_7kx16.coe","w")
-file.write(";7k*16\nmemory_initialization_radix=16;\nmemory_initialization_vector=\n")
+file = open("./game_assets/coe/CompTexture_9kx16.coe","w")
+file.write(";9k*16\nmemory_initialization_radix=16;\nmemory_initialization_vector=\n")
 
 files = [
 	"./game_assets/tutorial.png",
 	"./game_assets/gameover.png",
 	"./game_assets/ready.png",
 ]
-size = 57*49+96*21+92*25
+size = 57*84+96*21+92*25
 for fname in files:
 	img_raw = Image.open(fname)
 	print(fname)
@@ -31,7 +31,7 @@ for fname in files:
 			file.write(" ")
 		file.write("\n")
 
-for i in range(0,7 * 1024 - size):
+for i in range(0,9 * 1024 - size):
 	file.write("0000 ")
 file.write("\n;")
 print("Finish")

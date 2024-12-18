@@ -3,6 +3,7 @@ module StatusUpdate(
     input rstn,
     input upd,
     input retry,
+    input god_mode,
     input [2:0] p1_input,
     input [31:0] bird_x,
     input [15:0] p1_bird_y,
@@ -53,7 +54,7 @@ always @(posedge clk) begin
                 end
             end
             2'b10: begin
-                if(collide) begin
+                if(~god_mode & collide) begin
                     game_status <= 2'b11;
                     gameover_timestamp <= timer;
                 end
@@ -65,7 +66,7 @@ always @(posedge clk) begin
                             score_decimal[3:0] <= 0;
                             if(score_decimal[7:4] == 4'b1001) begin
                                 score_decimal[7:4] <= 0;
-                                score_decimal[7:4] <= score_decimal[7:4] + 1;
+                                score_decimal[11:8] <= score_decimal[11:8] + 1;
                             end else begin
                                 score_decimal[7:4] <= score_decimal[7:4] + 1;
                             end
