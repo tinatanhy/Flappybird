@@ -37,13 +37,14 @@ wire [11:0] score_posx_31 = (screen_x - score_x31) >> 1;
 wire [11:0] score_posx_32 = (screen_x - score_x32) >> 1;
 wire [11:0] score_posx_33 = (screen_x - score_x33) >> 1;
 wire [11:0] score_posy    = (screen_y - score_y) >> 1;
+wire score_place_mask = score_mask_y & (score_mask_x11 || score_mask_x21 || score_mask_x22 || score_mask_x31 || score_mask_x32 || score_mask_x33);
+
 wire [11:0] score_addr_11 = score_posx_11 + img_w * score_posy + score_decimal[3:0] * num_w;
 wire [11:0] score_addr_21 = score_posx_21 + img_w * score_posy + score_decimal[7:4] * num_w;
 wire [11:0] score_addr_22 = score_posx_22 + img_w * score_posy + score_decimal[3:0] * num_w;
 wire [11:0] score_addr_31 = score_posx_31 + img_w * score_posy + score_decimal[11:8] * num_w;
 wire [11:0] score_addr_32 = score_posx_32 + img_w * score_posy + score_decimal[7:4] * num_w;
 wire [11:0] score_addr_33 = score_posx_33 + img_w * score_posy + score_decimal[3:0] * num_w;
-wire score_place_mask = score_mask_y & (score_mask_x11 || score_mask_x21 || score_mask_x22 || score_mask_x31 || score_mask_x32 || score_mask_x33);
 
 assign addr = score_place_mask ? ({12{score_mask_y}} & (
 	  {12{score_mask_x11}} & score_addr_11
@@ -51,8 +52,8 @@ assign addr = score_place_mask ? ({12{score_mask_y}} & (
 	| {12{score_mask_x22}} & score_addr_22
 	| {12{score_mask_x31}} & score_addr_31
 	| {12{score_mask_x32}} & score_addr_32
-	| {12{score_mask_x33}} & score_addr_33
-)) : 12'd2161;
+	| {12{score_mask_x33}} & score_addr_33)) : 12'd2161;
+
 assign mask = score_place_mask & col_in[3];
 assign col_out = col_in;
 endmodule
