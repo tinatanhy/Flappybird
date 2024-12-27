@@ -1,1 +1,0 @@
---incr --debug typical --relax --mt 2  -L blk_mem_gen_v8_4_6 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot BRAM_Anim xil_defaultlib.BRAM_Anim xil_defaultlib.glbl -log elaborate.log

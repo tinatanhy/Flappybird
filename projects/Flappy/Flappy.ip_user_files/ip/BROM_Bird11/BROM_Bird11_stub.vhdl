@@ -2,10 +2,10 @@
 -- Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
--- Date        : Thu Dec 12 21:13:03 2024
--- Host        : rubatoPC running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub -rename_top BROM_Bird11 -prefix
---               BROM_Bird11_ BROM_Bird11_stub.vhdl
+-- Date        : Fri Dec 27 18:09:49 2024
+-- Host        : RUBATOPC-LITE running 64-bit major release  (build 9200)
+-- Command     : write_vhdl -force -mode synth_stub
+--               c:/rubatotree/Repositories/Flappybird/projects/Flappy/Flappy.gen/sources_1/ip/BROM_Bird11/BROM_Bird11_stub.vhdl
 -- Design      : BROM_Bird11
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7a100tcsg324-1

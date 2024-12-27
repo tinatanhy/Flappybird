@@ -3,3 +3,6 @@ projects/test/test.*/
 projects/Flappy/Flappy.*/
 !projects/Flappy/Flappy.srcs/
 !projects/Flappy/Flappy.ip_user_files/
+*.log
+*.jou
+*.str
