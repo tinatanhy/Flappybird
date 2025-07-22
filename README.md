@@ -2,9 +2,9 @@
 
 在 FPGA 上实现一个 Flappy Bird！
 
-<img src="http://blog.umb-coffee.icu/2024/fpga-flappy/fpgaflappy.png" style="width:30%"> </img>
+![Cover](assets/fpgaflappy.png)
 
-![1735050788516](assets/1735050788516.png)
+[![Video](https://img.youtube.com/vi/InrxOJ-FaT0/0.jpg)](https://www.youtube.com/watch?v=InrxOJ-FaT0)
 
 ---
 
@@ -12,7 +12,7 @@
 
 实验链接：[实验介绍 - Digital Lab 2024](https://soc.ustc.edu.cn/Digital/2024/lab8/intro/)   我们选取了分值最高的 VGA 小游戏。
 
-演示视频：https://www.bilibili.com/video/BV1w6CNYPEak
+@tinatanhy 上传的演示视频：https://www.bilibili.com/video/BV1w6CNYPEak
 
 @rubatotree 的开发 blog：[用 FPGA 写 Flappy Bird！ - Umbrella Coffee Blog by rubatotree](http://blog.umb-coffee.icu/2024/fpga-flappy/) 含有对框架设计及具体实现的详细说明。
 
