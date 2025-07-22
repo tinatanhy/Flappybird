@@ -4,6 +4,8 @@
 
 ![Cover](assets/fpgaflappy.png)
 
+Video on YouTube: 
+
 [![Video](https://img.youtube.com/vi/InrxOJ-FaT0/0.jpg)](https://www.youtube.com/watch?v=InrxOJ-FaT0)
 
 ---
